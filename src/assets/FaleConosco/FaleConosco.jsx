@@ -29,7 +29,7 @@ function FaleConosco() {
                     </div>
 
                     <div className="input-group">
-                        <label><FontAwesomeIcon icon={faPhone} /> Telefone</label>
+                        <label><FontAwesomeIcon icon={faPhone}/> Telefone</label>
                         <input type="text" placeholder="Somente números" value={telefone} onChange={(e) => setTelefone(e.target.value)} />
                     </div>
 
