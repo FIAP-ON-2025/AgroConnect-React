@@ -1,0 +1,71 @@
+.fale-conosco-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: #f4f7f6;
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.fale-conosco-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.fale-conosco-card h2 {
+  color: #2d5a27; /* Verde Agro */
+  margin-bottom: 10px;
+}
+
+.fale-conosco-card p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: black;
+  text-align: left;
+}
+
+.input-group input, .input-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.btn-enviar {
+  width: 100%;
+  padding: 12px;
+  background-color: #2d5a27;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.btn-enviar:hover {
+  background-color: #23471e;
+  transform: translateY(-2px); /* O botão sobe um pouquinho */
+  transition: 0.3s;
+}
