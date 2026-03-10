@@ -34,12 +34,12 @@ function FaleConosco() {
                     </div>
 
                     <div className="input-group">
-                        <label>🏷️ Assunto</label>
+                        <label><FontAwesomeIcon icon={faTag} /> Assunto</label>
                         <input type="text" placeholder="Selecione um assunto" value={assunto} onChange={(e) => setAssunto(e.target.value)} />
                     </div>
 
                     <div className="input-group">
-                        <label>💬 Sua mensagem</label>
+                        <label><FontAwesomeIcon icon={faComment} /> Sua mensagem</label>
                         <textarea rows="4" placeholder="Escreva sua mensagem detalhada aqui..." value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
                     </div>
 
