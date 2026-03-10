@@ -1,18 +1,32 @@
-import React from 'react';
-import "../../../AgroConnect/css/fale-conosco.css";
-// Criando o componente FaleConosco
-const FaleConosco = () => {
+import { useState } from 'react';
+function FaleConosco() {
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [mensagem, setMensagem] = useState('');
+
+
     return (
-        <section className="container-fale-conosco"> 
+        <div style={{ padding: '20px', fontFamily: 'Arial' }}>
             <h2>Fale Conosco</h2>
             <form>
-                <label htmlFor="nome">Nome:</label>
-                <input type="text" id="nome" className="input-estilo" />
-                
-                <button type="submit">Enviar</button>
+                <div>
+                    <label>Nome:</label><br />
+                    <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} />
+                </div>
+                <br />
+                <div>
+                    <label>E-mail:</label><br />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <br />
+                <div>
+                    <label>Mensagem:</label><br />
+                    <textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
+                </div>
+                <br />
+                <button type="submit">Enviar Mensagem</button>
             </form>
-        </section>
+        </div>
     );
-};
-
+}
 export default FaleConosco;
