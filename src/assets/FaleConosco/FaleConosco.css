@@ -20,7 +20,7 @@
 }
 
 .fale-conosco-card h2 {
-  color: #2d5a27; /* Verde Agro */
+  color: #2d5a27; 
   margin-bottom: 10px;
 }
 
@@ -55,6 +55,11 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #f9f9f9;
+  font-size: 14px;
+  box-sizing: border-box;
+  display: block;
+  outline: none;
+  cursor: pointer; 
   color: black;
 }
 
@@ -75,6 +80,7 @@ appearance: none;
   display: none;
 }
 
+
 .input-group textarea {
   scrollbar-width: none;
   resize: none;
@@ -87,12 +93,16 @@ appearance: none;
   word-break: break-all;
 }
 
+.input-group textarea::-webkit-scrollbar {
+  display: none;
+}
 
 
 .select-placeholder {
   color: #757575 !important;
   
 }
+
 
 .btn-enviar {
   width: 100%;
@@ -104,12 +114,10 @@ appearance: none;
   cursor: pointer;
   font-weight: bold;
   margin-top: 10px;
+  transition: 0.3s;
 }
 
 .btn-enviar:hover {
   background-color: #23471e;
-  transform: translateY(-2px); /* O botão sobe um pouquinho */
-  transition: 0.3s;
-
-  
+  transform: translateY(-2px);
 }
