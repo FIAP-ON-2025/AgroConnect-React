@@ -1,65 +1,177 @@
-import { useState } from 'react';
+import { useState } from "react";
 import "./FaleConosco.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRocket, faPaperPlane, faUser, faEnvelope, faPhone, faTag, faComment } from '@fortawesome/free-solid-svg-icons';
-function FaleConosco() {
-    const [nome, setNome] = useState('');
-    const [email, setEmail] = useState('');
-    const [telefone, setTelefone] = useState('');
-    const [assunto, setAssunto] = useState('');
-    const [mensagem, setMensagem] = useState('');
 
-
-
-    return (
-        <div className="fale-conosco-container">
-            <div className="fale-conosco-card">
-                <h2>Envie sua mensagem!</h2>
-                <p>Preencha o formulário e nossa equipe AgroConnect responderá em breve.</p>
-
-                <form>
-                    <div className="input-group">
-                        <label><FontAwesomeIcon icon={faUser} /> Nome</label>
-                        <input type="text" placeholder="Seu nome completo" value={nome} onChange={(e) => setNome(e.target.value)} />
-                    </div>
-
-                    <div className="input-group">
-                        <label><FontAwesomeIcon icon={faEnvelope} /> Email</label>
-                        <input type="email" placeholder="seu.email@exemplo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    </div>
-
-                    <div className="input-group">
-                        <label><FontAwesomeIcon icon={faPhone} /> Telefone</label>
-                        <input type="text" placeholder="Somente números" value={telefone} onChange={(e) => setTelefone(e.target.value)} />
-                    </div>
-
-                    <div className="input-group">
-                        <label><FontAwesomeIcon icon={faTag} /> Assunto</label>
-                        <select
-                            value={assunto}
-                            onChange={(e) => setAssunto(e.target.value)} className={assunto === "" ? "select-placeholder" : "select-selected"}>
-                            <option value="">Selecione um assunto</option>
-                            <option value="duvida">Dúvida de Cadastro</option>
-                            <option value="bug">Problema Técnico (bug)</option>
-                            <option value="sugestao">Sugestão</option>
-                            <option value="feedback">Feedback</option>
-                            <option value="comercial">Assunto Comercial</option>
-                            <option value="outros">Outros</option>
-                        </select>
-                    </div>
-
-                    <div className="input-group">
-                        <label><FontAwesomeIcon icon={faComment} /> Sua mensagem</label>
-                        <textarea rows="4" placeholder="Escreva sua mensagem detalhada aqui..." value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
-                    </div>
-
-                    <button type="submit" className="btn-enviar">
-                        Enviar Mensagem <FontAwesomeIcon icon={faRocket} />
-                    </button>
-                </form>
-            </div>
+export default function FaleConosco() {
+  return (
+    <>
+      <nav>
+        <div className="logo">
+          <img
+            src="/images/logo_horizontal_ofc.png"
+            alt="AgroConnect Logo"
+            className="logo-img"
+          />
         </div>
-    );
-}
 
-export default FaleConosco;
+        <ul className="nav-links">
+          <li>
+            <a href="/">Início</a>
+          </li>
+          <li>
+            <a href="/cadastro">Cadastre-se</a>
+          </li>
+          <li>
+            <a href="/fale-conosco">Fale Conosco</a>
+          </li>
+        </ul>
+      </nav>
+
+      <header>
+        <div className="hero-content">
+          <h1>Fale Conosco</h1>
+          <p className="tagline">
+            Dúvidas ou sugestões? Nossa equipe está pronta para te atender.
+          </p>
+        </div>
+      </header>
+
+      <main>
+        <section className="section">
+          <div className="content-section">
+            <div className="content-text">
+              <h2>Mande uma mensagem</h2>
+
+              {/* Informação de Telefone que faltava */}
+              <p className="contato-direto">
+                📞 <strong>Telefone:</strong> (99) 99999-9999 <br />
+                📧 <strong>E-mail:</strong> contato@agroconnect.com
+              </p>
+
+              <form className="contato-form">
+                <div className="form-group">
+                  <input
+                    type="text"
+                    placeholder="Seu Nome"
+                    className="input-field"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <input
+                    type="email"
+                    placeholder="Seu E-mail"
+                    className="input-field"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <input
+                    type="tel"
+                    placeholder="Seu Telefone (ex: 99 99999-9999)"
+                    className="input-field"
+                  />
+                </div>
+
+                
+                <div className="form-group">
+                  <select className="input-field select-field">
+                    <option value="">Selecione o Assunto</option>
+                    <option value="duvida">Dúvida Técnica</option>
+                    <option value="parceria">Parcerias</option>
+                    <option value="suporte">Suporte ao Agricultor</option>
+                    <option value="elogio">Sugestões ou Elogios</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <textarea
+                    placeholder="Sua Mensagem"
+                    className="input-field textarea"
+                  ></textarea>
+                </div>
+
+                <button type="submit" className="btn btn-primary">
+                  Enviar Agora
+                </button>
+              </form>
+            </div>
+
+            <div className="content-visual">💬</div>
+          </div>
+        </section>
+      </main>
+
+      
+      <footer>
+        <div className="footer-content">
+          <div className="footer-section">
+            <h4>Sobre</h4>
+            <ul>
+              <li>
+                <a href="#">Quem Somos</a>
+              </li>
+              <li>
+                <a href="#">Nossa Missão</a>
+              </li>
+              <li>
+                <a href="#">Carreiras</a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Recursos</h4>
+            <ul>
+              <li>
+                <a href="#">Blog</a>
+              </li>
+              <li>
+                <a href="#">Documentação</a>
+              </li>
+              <li>
+                <a href="#">Suporte</a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Legal</h4>
+            <ul>
+              <li>
+                <a href="#">Privacidade</a>
+              </li>
+              <li>
+                <a href="#">Termos de Uso</a>
+              </li>
+              <li>
+                <a href="#">Cookies</a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Conecte-se</h4>
+            <ul>
+              <li>
+                <a href="#">LinkedIn</a>
+              </li>
+              <li>
+                <a href="#">Instagram</a>
+              </li>
+              <li>
+                <a href="#">Twitter</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>
+            © 2025 AgroConnect. Todos os direitos reservados.
+            Transformando a agricultura, combatendo a fome.
+          </p>
+        </div>
+      </footer>
+    </>
+  );
+}
