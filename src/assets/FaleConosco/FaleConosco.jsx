@@ -29,13 +29,23 @@ function FaleConosco() {
                     </div>
 
                     <div className="input-group">
-                        <label><FontAwesomeIcon icon={faPhone}/> Telefone</label>
+                        <label><FontAwesomeIcon icon={faPhone} /> Telefone</label>
                         <input type="text" placeholder="Somente números" value={telefone} onChange={(e) => setTelefone(e.target.value)} />
                     </div>
 
                     <div className="input-group">
                         <label><FontAwesomeIcon icon={faTag} /> Assunto</label>
-                        <input type="text" placeholder="Selecione um assunto" value={assunto} onChange={(e) => setAssunto(e.target.value)} />
+                        <select
+                            value={assunto}
+                            onChange={(e) => setAssunto(e.target.value)} className={assunto === "" ? "select-placeholder" : "select-selected"}>
+                            <option value="">Selecione um assunto</option>
+                            <option value="duvida">Dúvida de Cadastro</option>
+                            <option value="bug">Problema Técnico (bug)</option>
+                            <option value="sugestao">Sugestão</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="comercial">Assunto Comercial</option>
+                            <option value="outros">Outros</option>
+                        </select>
                     </div>
 
                     <div className="input-group">
