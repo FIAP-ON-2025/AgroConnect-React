@@ -71,7 +71,7 @@ box-sizing: border-box;
 appearance: none;
 }
 
-.input-group textarea: :-webkit-scrollbar {
+.input-group textarea :-webkit-scrollbar {
   display: none;
 }
 
