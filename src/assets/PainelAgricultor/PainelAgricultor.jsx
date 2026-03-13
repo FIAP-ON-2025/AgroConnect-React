@@ -232,17 +232,33 @@ export default function PainelAgricultor({ onNavigate }) {
             ))}
           </div>
           {diaSelecionadoId && (
-            <div className="previsao-detalhada">
+            <div
+              className="previsao-detalhada"
+              onClick={() => setDiaSelecionadoId(null)}
+            >
               {(() => {
                 const diaSelecionado = previsaoTempo.find(
                   (dia) => dia.id === diaSelecionadoId
                 );
                 if (!diaSelecionado) return null;
                 return (
-                  <>
-                    <h3 className="previsao-detalhada-titulo">
-                      Detalhe horário - {diaSelecionado.dia}
-                    </h3>
+                  <div
+                    className="previsao-detalhada-conteudo"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="previsao-detalhada-header">
+                      <h3 className="previsao-detalhada-titulo">
+                        Detalhe horário - {diaSelecionado.dia}
+                      </h3>
+                      <button
+                        type="button"
+                        className="previsao-detalhada-fechar"
+                        onClick={() => setDiaSelecionadoId(null)}
+                        aria-label="Fechar detalhes da previsão"
+                      >
+                        ×
+                      </button>
+                    </div>
                     <div className="previsao-detalhada-lista">
                       {diaSelecionado.detalhesHorario.map((hora) => (
                         <div key={hora.horario} className="previsao-detalhada-item">
@@ -262,7 +278,7 @@ export default function PainelAgricultor({ onNavigate }) {
                         </div>
                       ))}
                     </div>
-                  </>
+                  </div>
                 );
               })()}
             </div>
