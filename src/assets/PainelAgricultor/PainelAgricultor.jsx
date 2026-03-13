@@ -32,7 +32,7 @@ const alertas = [
   },
 ];
 
-// Valores exibidos na calculadora (somente visual)
+
 const calculadoraValores = {
   area: 10,
   produtividade: 5.5,
@@ -131,7 +131,6 @@ export default function PainelAgricultor({ onNavigate }) {
             labelDia = dataFormatada;
           }
 
-          // Agrupa os dados horários para este dia
           const detalhesHorario = [];
           hourlyTime.forEach((timeStr, idxHora) => {
             if (timeStr.startsWith(diaIso)) {
@@ -152,13 +151,30 @@ export default function PainelAgricultor({ onNavigate }) {
                 detalhesHorario.length
               : 0;
 
+          const mediaNuvensHorario =
+            detalhesHorario.length > 0
+              ? detalhesHorario.reduce((acc, item) => acc + item.nuvens, 0) /
+                detalhesHorario.length
+              : 0;
+
           let icon = "☀️";
+
+          // Ícone baseado em chuva
           if (mediaChuvaHorario >= 5) {
             icon = "🌧️";
           } else if (mediaChuvaHorario >= 1) {
             icon = "🌦️";
           } else if (mediaChuvaHorario > 0) {
             icon = "⛅";
+          }
+
+          // Ícone baseado no percentual médio de nuvens
+          if (mediaChuvaHorario === 0) {
+            if (mediaNuvensHorario >= 80) {
+              icon = "☁️"; // bem nublado
+            } else if (mediaNuvensHorario >= 40) {
+              icon = "⛅"; // parcialmente nublado
+            }
           }
 
           return {
