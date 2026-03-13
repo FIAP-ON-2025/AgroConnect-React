@@ -333,6 +333,41 @@ export default function PainelAgricultor({ onNavigate }) {
               />
             </div>
 
+            <div className="input-group">
+              <label>Unidade de Medida</label>
+              <select
+                value={unidade}
+                onChange={(e) => setUnidade(e.target.value)}
+              >
+                <option value="Kg">Quilos (Kg)</option>
+                <option value="g">Gramas (g)</option>
+                <option value="un">Unidades (un)</option>
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label>Prazo de Validade</label>
+              <input
+              type="date"
+              value={validade}
+              onChange={(e) => setValidade(e.target.value)}
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Estoque Mínimo (Alerta!)</label>
+              <input
+              type="number"
+              placeholder="Ex: 10"
+              value={estoqueMinimo}
+              onChange={(e) => setEstoqueMinimo(e.target.value)}
+              />
+            </div>
+
+            <button type="button" className="btn btn-primary btn-cadastrar">
+              Cadastrar Produto
+            </button>
+
           </div>
         </section> 
 
