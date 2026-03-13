@@ -80,6 +80,14 @@ export default function PainelAgricultor({ onNavigate }) {
 
   const [previsaoTempo, setPrevisaoTempo] = React.useState(previsaoTempoInicial);
   const [diaSelecionadoId, setDiaSelecionadoId] = React.useState(null);
+  
+  const [nome, setNome] = React.useState("");
+  const [quantidade, setQuantidade] = React.useState("");
+  const [unidade, setUnidade] = React.useState("Kg");
+  const [validade, setValidade] = React.useState("");
+  const [estoqueMinimo, setEstoqueMinimo] = React.useState("");
+
+  const [listaProdutos, setListaProdutos] = React.useState([]);
 
   React.useEffect(() => {
     async function carregarPrevisao() {
@@ -300,6 +308,33 @@ export default function PainelAgricultor({ onNavigate }) {
             </div>
           )}
         </section>
+
+        <section className="section section-cadastro">
+          <h2 className="section-title">🚜 Cadastrar Nova Colheita</h2>
+          <div className="card">
+
+            <div className="input-group">
+              <label>Nome do Produto</label>
+              <input
+              type="text"
+              placeholder="Ex: Alface"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Quantidade Colhida</label>
+              <input 
+              type="number"
+              placeholder="Ex: 50"
+              value={quantidade}
+              onChange={(e) => setQuantidade(e.target.value)}
+              />
+            </div>
+
+          </div>
+        </section> 
 
         <section className="section">
           <h2 className="section-title">📊 Resumo da Produção</h2>
