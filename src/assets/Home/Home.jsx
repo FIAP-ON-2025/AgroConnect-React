@@ -1,22 +1,22 @@
 import React from "react";
 import "./Home.css";
 
-export default function Home() {
+export default function Home({ onNavigate }) {
   return (
     <>
       <nav>
         <div className="logo">
           <img
-            src="/images/logo_horizontal_ofc.png"
-            alt="AgroConnect Logo"
+            src="/public-images/logo_horizontal_ofc.png"
+            alt="AgroConnect"
             className="logo-img"
           />
         </div>
 
         <ul className="nav-links">
-          <li><a href="/">Início</a></li>
-          <li><a href="/cadastro">Cadastre-se</a></li>
-          <li><a href="/fale-conosco">Fale Conosco</a></li>
+          <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Início</a></li>
+          <li><a onClick={() => onNavigate('cadastro')} style={{ cursor: 'pointer' }}>Cadastre-se</a></li>
+          <li><a onClick={() => onNavigate('fale-conosco')} style={{ cursor: 'pointer' }}>Fale Conosco</a></li>
         </ul>
       </nav>
 
@@ -115,7 +115,7 @@ export default function Home() {
                   Saiba Mais
                 </button>
 
-                <a href="/cadastro" className="btn btn-primary">
+                <a onClick={() => onNavigate('cadastro')} className="btn btn-primary" style={{ cursor: 'pointer' }}>
                   Cadastre-se
                 </a>
               </div>
@@ -149,7 +149,7 @@ export default function Home() {
               </p>
 
               <div className="buttons-group">
-                <a href="/fale-conosco" className="btn btn-primary">
+                <a onClick={() => onNavigate('fale-conosco')} className="btn btn-primary" style={{ cursor: 'pointer' }}>
                   Fale Conosco
                 </a>
               </div>

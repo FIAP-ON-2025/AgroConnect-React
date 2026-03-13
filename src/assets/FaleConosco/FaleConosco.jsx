@@ -1,13 +1,13 @@
 import { useState } from "react";
 import "./FaleConosco.css";
 
-export default function FaleConosco() {
+export default function FaleConosco({ onNavigate }) {
   return (
     <>
       <nav>
         <div className="logo">
           <img
-            src="/images/logo_horizontal_ofc.png"
+            src="/public-images/logo_horizontal_ofc.png"
             alt="AgroConnect Logo"
             className="logo-img"
           />
@@ -15,13 +15,13 @@ export default function FaleConosco() {
 
         <ul className="nav-links">
           <li>
-            <a href="/">Início</a>
+            <a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Início</a>
           </li>
           <li>
-            <a href="/cadastro">Cadastre-se</a>
+            <a onClick={() => onNavigate('cadastro')} style={{ cursor: 'pointer' }}>Cadastre-se</a>
           </li>
           <li>
-            <a href="/fale-conosco">Fale Conosco</a>
+            <a onClick={() => onNavigate('fale-conosco')} style={{ cursor: 'pointer' }}>Fale Conosco</a>
           </li>
         </ul>
       </nav>

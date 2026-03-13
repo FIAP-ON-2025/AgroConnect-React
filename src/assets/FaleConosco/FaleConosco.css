@@ -99,4 +99,7 @@ nav {
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    font-size: 1rem;}
+    font-size: 1rem;
+    background-color: #ffffff;
+    color: #333;
+}
