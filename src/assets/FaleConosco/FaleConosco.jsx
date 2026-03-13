@@ -138,7 +138,7 @@ export default function FaleConosco({ onNavigate }) {
             <h4>Legal</h4>
             <ul>
               <li>
-                <a href="#">Privacidade</a>
+                <a href="#">Privac idade</a>
               </li>
               <li>
                 <a href="#">Termos de Uso</a>
