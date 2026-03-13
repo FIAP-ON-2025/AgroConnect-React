@@ -2,7 +2,7 @@ import { useState } from 'react';
 import FaleConosco from './assets/FaleConosco/FaleConosco';
 import Home from "./assets/Home/Home";
 import Cadastro from "./assets/Cadastro/cadastro";
-import Funcionalidades from "./assets/Funcionalidades/Funcionalidades";
+import PainelAgricultor from "./assets/PainelAgricultor/PainelAgricultor";
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -12,7 +12,7 @@ function App() {
       {currentPage === 'home' && <Home onNavigate={setCurrentPage} />}
       {currentPage === 'cadastro' && <Cadastro onNavigate={setCurrentPage} />}
       {currentPage === 'fale-conosco' && <FaleConosco onNavigate={setCurrentPage} />}
-      {currentPage === 'home-agricultor' && <Funcionalidades onNavigate={setCurrentPage} />}
+      {currentPage === 'painel-agricultor' && <PainelAgricultor onNavigate={setCurrentPage} />}
     </div>
   );
 }
