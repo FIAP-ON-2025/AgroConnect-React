@@ -55,13 +55,22 @@ export default function PainelAgricultor({ onNavigate }) {
   const [estoqueMinimo, setEstoqueMinimo] = React.useState("");
   const [listaProdutos, setListaProdutos] = React.useState([]);
   const [peso, setPeso] = React.useState("");
+  const [editandoId, setEditandoId] = React.useState(null);
 
   const handleExcluir = (idParaRemover) => {
     setListaProdutos(listaProdutos.filter((produto) => produto.id !== idParaRemover));
   };
 
   const handleEditar = (produto) => {
-    console.log("Editar:", produto);
+    setEditandoId(produto.id);
+    setNome(produto.nome);
+    setQuantidade(produto.quantidade);
+    setUnidade(produto.unidade);
+    setValidade(produto.validade || "");
+    setEstoqueMinimo(produto.estoqueMinimo || "");
+    setPeso(produto.peso || "");
+
+    window.scrollTo({ top: 0, behavior: "smooth"});
   };
 
   const handleCadastrar = () => {
@@ -69,8 +78,26 @@ export default function PainelAgricultor({ onNavigate }) {
       alert("Por favor, preencha o nome e a quantidade antes de cadastrar!");
       return;
     }
+    if (editandoId) {
+      const listaAtualizada = listaProdutos.map((produto) => {
+        if (produto.id === editandoId) {
+          return {
+          ...produto,
+          nome,
+          quantidade,
+          unidade,
+          validade,
+          estoqueMinimo,
+          peso
+          };
+        }
+        return produto;
+      });
 
-    const novoProduto = {
+      setListaProdutos(listaAtualizada);
+      setEditandoId(null);
+    } else {
+      const novoProduto = {
       id: Date.now().toString(),
       nome: nome,
       quantidade: quantidade,
@@ -78,9 +105,11 @@ export default function PainelAgricultor({ onNavigate }) {
       validade: validade,
       estoqueMinimo: estoqueMinimo,
       peso: peso,
-    };
+      }; 
 
-    setListaProdutos([...listaProdutos, novoProduto]);
+      setListaProdutos([...listaProdutos, novoProduto]); 
+    }
+      
     setNome("");
     setQuantidade("");
     setUnidade("Kg");
@@ -88,6 +117,11 @@ export default function PainelAgricultor({ onNavigate }) {
     setEstoqueMinimo("");
     setPeso("");
   };
+
+    
+
+    
+    
 
   return (
     <div className="page-funcionalidades">
