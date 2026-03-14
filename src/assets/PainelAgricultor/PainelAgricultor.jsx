@@ -70,7 +70,11 @@ export default function PainelAgricultor({ onNavigate }) {
     setEstoqueMinimo(produto.estoqueMinimo || "");
     setPeso(produto.peso || "");
 
-    window.scrollTo({ top: 0, behavior: "smooth"});
+    
+  const secaoCadastro = document.querySelector(".section-cadastro");
+  if (secaoCadastro) {
+    secaoCadastro.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const handleCadastrar = () => {
