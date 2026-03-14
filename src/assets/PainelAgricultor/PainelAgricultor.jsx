@@ -108,6 +108,122 @@ export default function PainelAgricultor({ onNavigate }) {
   const [previsaoTempo, setPrevisaoTempo] =
     React.useState(previsaoTempoInicial);
   const [diaSelecionadoId, setDiaSelecionadoId] = React.useState(null);
+
+  React.useEffect(() => {
+    async function carregarPrevisao() {
+      try {
+        const response = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=-23.563039&longitude=-46.635854&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,uv_index_max&hourly=temperature_2m,precipitation,cloudcover,windspeed_10m&forecast_days=4&timezone=America%2FSao_Paulo"
+        );
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+
+        if (!data.daily || !data.hourly) {
+          return;
+        }
+
+        const {
+          time: dailyTime,
+          temperature_2m_max,
+          temperature_2m_min,
+          precipitation_sum,
+          uv_index_max,
+        } = data.daily;
+
+        const {
+          time: hourlyTime,
+          temperature_2m: hourlyTemperature,
+          precipitation: hourlyPrecipitation,
+          cloudcover: hourlyCloudcover,
+          windspeed_10m: hourlyWindspeed,
+        } = data.hourly;
+
+        const itensPrevisao = dailyTime.map((diaIso, index) => {
+          const tempMax = Math.round(temperature_2m_max[index]);
+          const tempMin = Math.round(temperature_2m_min[index]);
+          const chuvaDia = precipitation_sum[index];
+          const uvMax = uv_index_max[index];
+
+          let labelDia;
+          if (index === 0) {
+            labelDia = "Hoje";
+          } else if (index === 1) {
+            labelDia = "Amanhã";
+          } else {
+            const dataFormatada = new Date(diaIso).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+            });
+            labelDia = dataFormatada;
+          }
+
+          const detalhesHorario = [];
+          hourlyTime.forEach((timeStr, idxHora) => {
+            if (timeStr.startsWith(diaIso)) {
+              const hora = timeStr.split("T")[1]; // "HH:MM"
+              detalhesHorario.push({
+                horario: hora,
+                temperatura: hourlyTemperature[idxHora],
+                chuva: hourlyPrecipitation[idxHora],
+                nuvens: hourlyCloudcover[idxHora],
+                vento: hourlyWindspeed[idxHora],
+              });
+            }
+          });
+
+          const mediaChuvaHorario =
+            detalhesHorario.length > 0
+              ? detalhesHorario.reduce((acc, item) => acc + item.chuva, 0) /
+              detalhesHorario.length
+              : 0;
+
+          const mediaNuvensHorario =
+            detalhesHorario.length > 0
+              ? detalhesHorario.reduce((acc, item) => acc + item.nuvens, 0) /
+              detalhesHorario.length
+              : 0;
+
+          let icon = "☀️";
+
+          // Ícone baseado em chuva
+          if (mediaChuvaHorario >= 5) {
+            icon = "🌧️";
+          } else if (mediaChuvaHorario >= 1) {
+            icon = "🌦️";
+          } else if (mediaChuvaHorario > 0) {
+            icon = "⛅";
+          }
+
+          // Ícone baseado no percentual médio de nuvens
+          if (mediaChuvaHorario === 0) {
+            if (mediaNuvensHorario >= 80) {
+              icon = "☁️"; // bem nublado
+            } else if (mediaNuvensHorario >= 40) {
+              icon = "⛅"; // parcialmente nublado
+            }
+          }
+
+          return {
+            id: String(index + 1),
+            dia: labelDia,
+            icon,
+            temp: `${tempMin}°C / ${tempMax}°C`,
+            descricao: `Chuva no dia: ${chuvaDia.toFixed(1)} mm · UV máx: ${uvMax.toFixed(
+              1
+            )}`,
+            detalhesHorario,
+          };
+        });
+
+        setPrevisaoTempo(itensPrevisao);
+      } catch (error) { }
+    }
+
+    carregarPrevisao();
+  }, []);
+
   const [nome, setNome] = React.useState("");
   const [quantidade, setQuantidade] = React.useState("");
   const [unidade, setUnidade] = React.useState("Kg");
@@ -235,8 +351,10 @@ export default function PainelAgricultor({ onNavigate }) {
             {previsaoTempo.map((item) => (
               <div
                 key={item.id}
-                className="card"
-                onClick={() => setDiaSelecionadoId(item.id)}
+                className={`card ${diaSelecionadoId === item.id ? "card-selecionado" : ""}`}
+                onClick={() =>
+                  setDiaSelecionadoId((prev) => (prev === item.id ? null : item.id))
+                }
                 style={{ cursor: "pointer" }}
               >
                 <span className="card-icon">{item.icon}</span>
@@ -246,6 +364,58 @@ export default function PainelAgricultor({ onNavigate }) {
               </div>
             ))}
           </div>
+          {diaSelecionadoId && (
+            <div
+              className="previsao-detalhada"
+              onClick={() => setDiaSelecionadoId(null)}
+            >
+              {(() => {
+                const diaSelecionado = previsaoTempo.find(
+                  (dia) => dia.id === diaSelecionadoId
+                );
+                if (!diaSelecionado) return null;
+                return (
+                  <div
+                    className="previsao-detalhada-conteudo"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="previsao-detalhada-header">
+                      <h3 className="previsao-detalhada-titulo">
+                        Detalhe horário - {diaSelecionado.dia}
+                      </h3>
+                      <button
+                        type="button"
+                        className="previsao-detalhada-fechar"
+                        onClick={() => setDiaSelecionadoId(null)}
+                        aria-label="Fechar detalhes da previsão"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div className="previsao-detalhada-lista">
+                      {diaSelecionado.detalhesHorario.map((hora) => (
+                        <div key={hora.horario} className="previsao-detalhada-item">
+                          <span className="previsao-detalhada-hora">{hora.horario}</span>
+                          <span className="previsao-detalhada-temp">
+                            {hora.temperatura.toFixed(1)}°C
+                          </span>
+                          <span className="previsao-detalhada-chuva">
+                            Chuva: {hora.chuva.toFixed(1)} mm
+                          </span>
+                          <span className="previsao-detalhada-nuvens">
+                            Nuvens: {hora.nuvens}%
+                          </span>
+                          <span className="previsao-detalhada-vento">
+                            Vento: {hora.vento.toFixed(1)} km/h
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </section>
 
         <section className="section section-cadastro">
