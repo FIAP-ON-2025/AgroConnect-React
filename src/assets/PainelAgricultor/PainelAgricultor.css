@@ -344,3 +344,39 @@
     font-size: 0.85rem;
   }
 }
+
+/* --- AJUSTE DE TAMANHO PADRONIZADO (TAMANHO ORIGINAL) --- */
+
+.page-funcionalidades .btn-primary,
+.page-funcionalidades .btn-update {
+  /* Removemos o span 2 para ele não ocupar a linha toda */
+  grid-column: 1; /* Força o botão a ficar na primeira coluna */
+  width: fit-content; /* O botão terá apenas o tamanho do texto + padding */
+  min-width: 200px; /* Garante que não fique pequeno demais */
+  padding: 12px 25px; /* Altura e largura interna iguais para ambos */
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+/* Cor VERDE - Cadastro */
+.page-funcionalidades .btn-primary {
+  background-color: #2e7d32 !important;
+  color: white;
+}
+
+/* Cor AZUL PETRÓLEO - Atualização */
+.page-funcionalidades .btn-update {
+  background-color: #006064 !important;
+  color: white;
+}
+
+/* Efeito ao passar o mouse para ambos */
+.page-funcionalidades .btn-primary:hover,
+.page-funcionalidades .btn-update:hover {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+}

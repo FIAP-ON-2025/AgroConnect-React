@@ -316,10 +316,10 @@ export default function PainelAgricultor({ onNavigate }) {
 
             <button
               type="button"
-              className="btn btn-primary"
+              className={editandoId ? "btn-update" : "btn btn-primary"}
               onClick={handleCadastrar}
             >
-              {editandoId ? "🔄 Atualizar Produto" : "✅ Cadastrar Produto"}
+              {editandoId ? "Atualizar Produto" : "Cadastrar Produto"}
             </button>
           </div>
         </section>
