@@ -53,7 +53,12 @@ export default function PainelAgricultor({ onNavigate }) {
   const [unidade, setUnidade] = React.useState("Kg");
   const [validade, setValidade] = React.useState("");
   const [estoqueMinimo, setEstoqueMinimo] = React.useState("");
-  const [listaProdutos, setListaProdutos] = React.useState([]);
+  
+  const [listaProdutos, setListaProdutos] = React.useState(() => {
+  const dadosSalvos = localStorage.getItem('produtosAgro');
+    return dadosSalvos ? JSON.parse(dadosSalvos) : [];
+  });
+  
   const [peso, setPeso] = React.useState("");
   const [editandoId, setEditandoId] = React.useState(null);
 
@@ -76,6 +81,13 @@ export default function PainelAgricultor({ onNavigate }) {
     secaoCadastro.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  
+  React.useEffect(() => {
+  const listaEmTexto = JSON.stringify(listaProdutos);
+  localStorage.setItem('produtosAgro', listaEmTexto);
+  console.log("Dados salvos no LocalStorage!");
+  }, [listaProdutos]); 
 
   const handleCadastrar = () => {
     if (nome === "" || quantidade === "") {
