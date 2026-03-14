@@ -89,6 +89,37 @@ export default function PainelAgricultor({ onNavigate }) {
 
   const [listaProdutos, setListaProdutos] = React.useState([]);
 
+  const handleExcluir = (idParaRemover) => {
+    const novaLista = listaProdutos.filter((produto) => produto.id !==idParaRemover);
+
+    setListaProdutos(novaLista);
+  
+  };
+
+  const handleCadastrar = () => {
+    if (nome === "" || quantidade === "") {
+      alert("Por favor, preencha o nome e a quantidade antes de cadastrar!")
+      return;
+    }
+
+    const novoProduto = {
+      id: Date.now().toString(),
+      nome: nome,
+      quantidade: quantidade,
+      unidade: unidade,
+      validade: validade,
+      estoqueMinimo: estoqueMinimo 
+    };
+
+    setListaProdutos([...listaProdutos, novoProduto]);
+
+    setNome("");
+    setQuantidade("");
+    setUnidade("Kg");
+    setValidade("");
+    setEstoqueMinimo("");
+  };
+
   React.useEffect(() => {
     async function carregarPrevisao() {
       try {
@@ -364,7 +395,9 @@ export default function PainelAgricultor({ onNavigate }) {
               />
             </div>
 
-            <button type="button" className="btn btn-primary btn-cadastrar">
+            <button type="button" className="btn btn-primary btn-cadastrar"
+            onClick={handleCadastrar}
+            >
               Cadastrar Produto
             </button>
 
@@ -374,19 +407,27 @@ export default function PainelAgricultor({ onNavigate }) {
         <section className="section">
           <h2 className="section-title">📊 Resumo da Produção</h2>
           <div className="cards-grid">
-            {produtos.map((produto) => (
+            {listaProdutos.map((produto) => (
               <div key={produto.id} className="card">
                 <span className="card-icon">{produto.icon}</span>
                 <h3 className="card-produto-nome">{produto.nome}</h3>
                 <p id={produto.id} className="card-estoque">
-                  Estoque: {produto.estoque_atual} {produto.unidade}
+                  Estoque: {produto.quantidade} {produto.unidade}
                 </p>
                 <div className="buttons-group buttons-estoque">
-                  <button type="button" className="btn btn-primary btn-estoque">
-                    Dar Entrada
+                  <button 
+                  type="button" 
+                  className="btn btn-primary btn-estoque"
+                  onClick={() => handleEditar(produto)}
+                  >
+                    Atualizar 
                   </button>
-                  <button type="button" className="btn btn-outline btn-estoque">
-                    Dar Baixa
+                  <button 
+                  type="button" 
+                  className="btn btn-outline btn-estoque"
+                  onClick={() => handleExcluir(produto.id)}
+                  >
+                    Excluir
                   </button>
                 </div>
               </div>
