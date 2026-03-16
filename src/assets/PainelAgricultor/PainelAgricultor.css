@@ -49,6 +49,12 @@
   margin: 10px 0;
 }
 
+.card-estoque-atual {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--gray-dark, #333);
+}
+
 .buttons-estoque {
   margin-top: 10px;
   flex-wrap: wrap;
@@ -57,6 +63,127 @@
 
 .btn-estoque {
   font-size: 0.85em;
+}
+
+.btn-entrada {
+  background-color: #2e7d32;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+}
+
+.btn-baixa {
+  background-color: #c62828;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+}
+
+.btn-entrada:hover,
+.btn-baixa:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+/* Modal de movimentação de estoque */
+.modal-movimento-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-movimento {
+  background: var(--white, #fff);
+  border-radius: 16px;
+  max-width: 420px;
+  width: 100%;
+  padding: 20px 22px 18px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+.modal-movimento-titulo {
+  margin: 0 0 6px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gray-dark, #333);
+}
+
+.modal-movimento-subtitulo,
+.modal-movimento-estoque-atual {
+  margin: 2px 0;
+  font-size: 0.9rem;
+  color: var(--gray-dark, #333);
+}
+
+.modal-movimento-input {
+  margin-top: 14px;
+}
+
+.modal-movimento-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn-cancelar-movimento {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+}
+
+.btn-cancelar-movimento:hover {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+}
+
+/* Toast de notificação */
+.toast-notificacao {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+  z-index: 1100;
+  cursor: pointer;
+}
+
+.toast-notificacao span {
+  white-space: nowrap;
+}
+
+.toast-notificacao-sucesso {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.toast-notificacao-erro {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.toast-notificacao-fechar {
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  color: inherit;
 }
 
 .page-funcionalidades .btn-outline {
@@ -116,6 +243,41 @@
   line-height: 1.6;
 }
 
+/* Ações discretas nos cards de produto */
+.card-produto {
+  position: relative;
+}
+
+.card-produto-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.card-produto-action-btn {
+  border: none;
+  background: transparent;
+  padding: 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  opacity: 0.7;
+  color: var(--gray-dark, #333);
+  transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease;
+}
+
+.card-produto-action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.card-produto-action-btn-delete {
+  color: var(--alert-color, #c62828);
+}
+
 /* Calculadora */
 .calculadora-inputs {
   margin-top: 25px;
@@ -143,6 +305,13 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   box-sizing: border-box;
+}
+
+.input-group input:disabled {
+  background-color: #f2f2f2;
+  border-color: #d0d0d0;
+  color: #777;
+  cursor: not-allowed;
 }
 
 .btn-calcular {

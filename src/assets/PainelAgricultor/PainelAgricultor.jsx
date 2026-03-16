@@ -1,41 +1,6 @@
 import React from "react";
 import "./PainelAgricultor.css";
 
-const produtos = [
-  {
-    id: "1",
-    nome: "Alface",
-    icon: "🥬",
-    unidade: "kg",
-    estoque_atual: 70,
-    estoque_minimo: 50,
-  },
-  {
-    id: "2",
-    nome: "Tomates",
-    icon: "🍅",
-    unidade: "kg",
-    estoque_atual: 235,
-    estoque_minimo: 200,
-  },
-  {
-    id: "3",
-    nome: "Abacaxi",
-    icon: "🍍",
-    unidade: "kg",
-    estoque_atual: 100,
-    estoque_minimo: 80,
-  },
-  {
-    id: "4",
-    nome: "Cenouras",
-    icon: "🥕",
-    unidade: "kg",
-    estoque_atual: 55,
-    estoque_minimo: 20,
-  },
-];
-
 const alertas = [
   {
     id: "1",
@@ -70,40 +35,7 @@ const calculadoraValores = {
 };
 
 export default function PainelAgricultor({ onNavigate }) {
-  const previsaoTempoInicial = [
-    {
-      id: "1",
-      dia: "Hoje",
-      icon: "☀️",
-      temp: "26°C",
-      descricao: "Céu limpo e ensolarado",
-      detalhesHorario: [],
-    },
-    {
-      id: "2",
-      dia: "Amanhã",
-      icon: "🌧️",
-      temp: "19°C",
-      descricao: "Possibilidade de chuva",
-      detalhesHorario: [],
-    },
-    {
-      id: "3",
-      dia: "15/04",
-      icon: "🌦️",
-      temp: "21°C",
-      descricao: "Parcialmente nublado",
-      detalhesHorario: [],
-    },
-    {
-      id: "4",
-      dia: "16/04",
-      icon: "☁️",
-      temp: "23°C",
-      descricao: "Nublado com sol",
-      detalhesHorario: [],
-    },
-  ];
+  const previsaoTempoInicial = [];
 
   const [previsaoTempo, setPrevisaoTempo] =
     React.useState(previsaoTempoInicial);
@@ -225,7 +157,6 @@ export default function PainelAgricultor({ onNavigate }) {
   }, []);
 
   const [nome, setNome] = React.useState("");
-  const [quantidade, setQuantidade] = React.useState("");
   const [unidade, setUnidade] = React.useState("Kg");
   const [validade, setValidade] = React.useState("");
   const [estoqueMinimo, setEstoqueMinimo] = React.useState("");
@@ -235,8 +166,12 @@ export default function PainelAgricultor({ onNavigate }) {
     return dadosSalvos ? JSON.parse(dadosSalvos) : [];
   });
 
-  const [peso, setPeso] = React.useState("");
+  const [estoqueAtual, setEstoqueAtual] = React.useState("");
   const [editandoId, setEditandoId] = React.useState(null);
+  const [produtoMovimento, setProdutoMovimento] = React.useState(null);
+  const [tipoMovimento, setTipoMovimento] = React.useState(null); // "entrada" | "baixa"
+  const [valorMovimento, setValorMovimento] = React.useState("");
+  const [notificacao, setNotificacao] = React.useState(null);
 
   const handleExcluir = (idParaRemover) => {
     setListaProdutos(
@@ -247,11 +182,10 @@ export default function PainelAgricultor({ onNavigate }) {
   const handleEditar = (produto) => {
     setEditandoId(produto.id);
     setNome(produto.nome);
-    setQuantidade(produto.quantidade);
     setUnidade(produto.unidade);
     setValidade(produto.validade || "");
     setEstoqueMinimo(produto.estoqueMinimo || "");
-    setPeso(produto.peso || "");
+    setEstoqueAtual(produto.estoqueAtual ?? "");
 
     const secaoCadastro = document.querySelector(".section-cadastro");
     if (secaoCadastro) {
@@ -266,8 +200,11 @@ export default function PainelAgricultor({ onNavigate }) {
   }, [listaProdutos]);
 
   const handleCadastrar = () => {
-    if (nome === "" || quantidade === "") {
-      alert("Por favor, preencha o nome e a quantidade antes de cadastrar!");
+    if (nome === "" || estoqueAtual === "") {
+      setNotificacao({
+        tipo: "erro",
+        mensagem: "Por favor, preencha o nome e o estoque atual antes de cadastrar!",
+      });
       return;
     }
     if (editandoId) {
@@ -276,11 +213,10 @@ export default function PainelAgricultor({ onNavigate }) {
           return {
             ...produto,
             nome,
-            quantidade,
             unidade,
             validade,
             estoqueMinimo,
-            peso,
+            estoqueAtual,
           };
         }
         return produto;
@@ -288,30 +224,138 @@ export default function PainelAgricultor({ onNavigate }) {
 
       setListaProdutos(listaAtualizada);
       setEditandoId(null);
+      setNotificacao({
+        tipo: "sucesso",
+        mensagem: "Produto atualizado com sucesso!",
+      });
     } else {
       const novoProduto = {
         id: Date.now().toString(),
         nome: nome,
-        quantidade: quantidade,
         unidade: unidade,
         validade: validade,
         estoqueMinimo: estoqueMinimo,
-        peso: peso,
+        estoqueAtual: estoqueAtual,
       };
 
       setListaProdutos([...listaProdutos, novoProduto]);
+      setNotificacao({
+        tipo: "sucesso",
+        mensagem: "Produto cadastrado com sucesso!",
+      });
     }
 
     setNome("");
-    setQuantidade("");
     setUnidade("Kg");
     setValidade("");
     setEstoqueMinimo("");
-    setPeso("");
+    setEstoqueAtual("");
+  };
+
+  const darEntradaProduto = (idProduto) => {
+    const valor = Number(valorMovimento.replace(",", "."));
+    if (Number.isNaN(valor) || valor <= 0) {
+      setNotificacao({
+        tipo: "erro",
+        mensagem: "Informe um valor numérico maior que zero.",
+      });
+      return;
+    }
+
+    setListaProdutos((produtosAnteriores) =>
+      produtosAnteriores.map((produto) => {
+        if (produto.id !== idProduto) return produto;
+        const estoqueAtualNumero = Number(produto.estoqueAtual || 0);
+        return {
+          ...produto,
+          estoqueAtual: estoqueAtualNumero + valor,
+        };
+      }),
+    );
+    setNotificacao({
+      tipo: "sucesso",
+      mensagem: "Entrada de estoque registrada com sucesso!",
+    });
+  };
+
+  const darBaixaProduto = (idProduto) => {
+    const valor = Number(valorMovimento.replace(",", "."));
+    if (Number.isNaN(valor) || valor <= 0) {
+      setNotificacao({
+        tipo: "erro",
+        mensagem: "Informe um valor numérico maior que zero.",
+      });
+      return;
+    }
+
+    setListaProdutos((produtosAnteriores) =>
+      produtosAnteriores.map((produto) => {
+        if (produto.id !== idProduto) return produto;
+        const estoqueAtualNumero = Number(produto.estoqueAtual || 0);
+        if (estoqueAtualNumero - valor < 0) {
+          setNotificacao({
+            tipo: "erro",
+            mensagem: "A quantidade em estoque não pode ficar menor que zero.",
+          });
+          return produto;
+        }
+        return {
+          ...produto,
+          estoqueAtual: estoqueAtualNumero - valor,
+        };
+      }),
+    );
+    setNotificacao({
+      tipo: "sucesso",
+      mensagem: "Baixa de estoque registrada com sucesso!",
+    });
+  };
+
+  const abrirModalMovimento = (produto, tipo) => {
+    setProdutoMovimento(produto);
+    setTipoMovimento(tipo); // "entrada" ou "baixa"
+    setValorMovimento("");
+  };
+
+  const fecharModalMovimento = () => {
+    setProdutoMovimento(null);
+    setTipoMovimento(null);
+    setValorMovimento("");
+  };
+
+  const confirmarMovimento = () => {
+    if (!produtoMovimento || !tipoMovimento) return;
+
+    if (tipoMovimento === "entrada") {
+      darEntradaProduto(produtoMovimento.id);
+    } else {
+      darBaixaProduto(produtoMovimento.id);
+    }
+
+    fecharModalMovimento();
   };
 
   return (
     <div className="page-funcionalidades">
+      {notificacao && (
+        <div
+          className={`toast-notificacao toast-notificacao-${notificacao.tipo}`}
+          onClick={() => setNotificacao(null)}
+        >
+          <span>{notificacao.mensagem}</span>
+          <button
+            type="button"
+            className="toast-notificacao-fechar"
+            onClick={(e) => {
+              e.stopPropagation();
+              setNotificacao(null);
+            }}
+            aria-label="Fechar notificação"
+          >
+            ×
+          </button>
+        </div>
+      )}
       <nav>
         <div className="logo">
           <img
@@ -432,16 +476,6 @@ export default function PainelAgricultor({ onNavigate }) {
             </div>
 
             <div className="input-group">
-              <label>Quantidade Colhida (itens/frutos)</label>
-              <input
-                type="number"
-                placeholder="Ex: 50"
-                value={quantidade}
-                onChange={(e) => setQuantidade(e.target.value)}
-              />
-            </div>
-
-            <div className="input-group">
               <label>Unidade de Medida</label>
               <select
                 value={unidade}
@@ -455,12 +489,13 @@ export default function PainelAgricultor({ onNavigate }) {
 
             {unidade !== "un" && (
               <div className="input-group">
-                <label>Peso Total Colhido ({unidade})</label>
+                <label>Estoque Atual ({unidade})</label>
                 <input
                   type="number"
                   placeholder="Ex: 120"
-                  value={peso}
-                  onChange={(e) => setPeso(e.target.value)}
+                  value={estoqueAtual}
+                  onChange={(e) => setEstoqueAtual(e.target.value)}
+                  disabled={!!editandoId}
                 />
               </div>
             )}
@@ -500,42 +535,47 @@ export default function PainelAgricultor({ onNavigate }) {
 
             <div className="cards-grid">
               {listaProdutos.map((produto) => (
-                <div key={produto.id} className="card">
+                <div key={produto.id} className="card card-produto">
+                  <div className="card-produto-actions">
+                    <button
+                      type="button"
+                      className="card-produto-action-btn"
+                      onClick={() => handleEditar(produto)}
+                      aria-label="Editar produto"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      type="button"
+                      className="card-produto-action-btn card-produto-action-btn-delete"
+                      onClick={() => handleExcluir(produto.id)}
+                      aria-label="Excluir produto"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                   <span className="card-icon">{produto.icon}</span>
                   <h3>{produto.nome}</h3>
                   <p className="card-estoque">
-                    Estoque: {produto.quantidade} unidades
-                    {produto.peso && (
-                      <span
-                        style={{
-                          display: "block",
-                          fontSize: "0.9em",
-                          marginTop: "4px",
-                        }}
-                      >
-                        Peso Total: {produto.peso} {produto.unidade}
-                      </span>
-                    )}
+                    Estoque atual:{" "}
+                    {produto.estoqueAtual !== undefined && produto.estoqueAtual !== null
+                      ? `${produto.estoqueAtual} ${produto.unidade}`
+                      : `0 ${produto.unidade}`}
                   </p>
-                  <div
-                    className="buttons-group"
-                    style={{
-                      justifyContent: "center",
-                      gap: "10px",
-                      marginTop: "10px",
-                    }}
-                  >
+                  <div className="buttons-group buttons-estoque">
                     <button
-                      className="btn btn-primary"
-                      onClick={() => handleEditar(produto)}
+                      type="button"
+                      className="btn btn-estoque btn-entrada"
+                      onClick={() => abrirModalMovimento(produto, "entrada")}
                     >
-                      Atualizar
+                      Dar Entrada
                     </button>
                     <button
-                      className="btn btn-outline"
-                      onClick={() => handleExcluir(produto.id)}
+                      type="button"
+                      className="btn btn-estoque btn-baixa"
+                      onClick={() => abrirModalMovimento(produto, "baixa")}
                     >
-                      Excluir
+                      Dar Baixa
                     </button>
                   </div>
                 </div>
@@ -557,6 +597,68 @@ export default function PainelAgricultor({ onNavigate }) {
           </div>
         </section>
       </main>
+
+      {produtoMovimento && (
+        <div className="modal-movimento-overlay" onClick={fecharModalMovimento}>
+          <div
+            className="modal-movimento"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="modal-movimento-titulo">
+              {tipoMovimento === "entrada" ? "Dar Entrada em Estoque" : "Dar Baixa em Estoque"}
+            </h3>
+            <p className="modal-movimento-subtitulo">
+              Produto: <strong>{produtoMovimento.nome}</strong>
+            </p>
+            <p className="modal-movimento-estoque-atual">
+              Estoque atual:{" "}
+              <strong>
+                {produtoMovimento.estoqueAtual ?? 0} {produtoMovimento.unidade}
+              </strong>
+            </p>
+            <div className="input-group modal-movimento-input">
+              <label>
+                Quantidade para{" "}
+                {tipoMovimento === "entrada" ? "entrada" : "baixa"} (
+                {produtoMovimento.unidade})
+              </label>
+              <input
+                type="number"
+                value={valorMovimento}
+                onChange={(e) => setValorMovimento(e.target.value)}
+                placeholder="Ex: 10"
+                min="0"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    confirmarMovimento();
+                  }
+                }}
+              />
+            </div>
+            <div className="modal-movimento-acoes">
+              <button
+                type="button"
+                className="btn btn-estoque btn-cancelar-movimento"
+                onClick={fecharModalMovimento}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={
+                  tipoMovimento === "entrada"
+                    ? "btn btn-estoque btn-entrada"
+                    : "btn btn-estoque btn-baixa"
+                }
+                onClick={confirmarMovimento}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer>
         <div className="footer-bottom">
