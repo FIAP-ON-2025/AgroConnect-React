@@ -1,27 +1,13 @@
 import React from "react";
 import "./PainelAgricultor.css";
 
-const alertas = [
+const alertasFixos = [
   {
     id: "1",
     icon: "🌩️",
     titulo: "Alerta Meteorológico",
     descricao:
       "Possibilidade de tempestade na sexta-feira. Proteja suas culturas e equipamentos.",
-  },
-  {
-    id: "2",
-    icon: "📉",
-    titulo: "Estoque Baixo",
-    descricao:
-      "Estoque de alface está baixo. Considere repor ou planejar nova colheita.",
-  },
-  {
-    id: "3",
-    icon: "📉",
-    titulo: "Estoque Baixo",
-    descricao:
-      "Estoque de tomate está baixo. Considere repor ou planejar nova colheita.",
   },
 ];
 
@@ -40,6 +26,53 @@ export default function PainelAgricultor({ onNavigate }) {
   const [previsaoTempo, setPrevisaoTempo] =
     React.useState(previsaoTempoInicial);
   const [diaSelecionadoId, setDiaSelecionadoId] = React.useState(null);
+  const alertas = React.useMemo(() => {
+  const alertasEstoque = listaProdutos
+    .map((produto) => {
+      const atual = Number(produto.estoqueAtual || 0);
+      const minimo = Number(produto.estoqueMinimo || 0);
+
+      if (atual <= 0) {
+        return {
+          id: `estoque-${produto.id}`,
+          icon: "🚨",
+          titulo: "Estoque Zerado",
+          descricao: `O produto ${produto.nome} está com estoque zerado. Estoque atual: ${atual} ${produto.unidade}. Reposição urgente.`,
+        };
+      }
+
+      if (minimo > 0 && atual <= minimo) {
+        return {
+          id: `estoque-${produto.id}`,
+          icon: "📉",
+          titulo: "Estoque Baixo",
+          descricao: `Estoque de ${produto.nome} está baixo. Estoque atual: ${atual} ${produto.unidade}. Estoque mínimo: ${minimo} ${produto.unidade}.`,
+        };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+
+  return [...alertasFixos, ...alertasEstoque];
+}, [listaProdutos]);
+
+  const [nome, setNome] = React.useState("");
+  const [unidade, setUnidade] = React.useState("Kg");
+  const [validade, setValidade] = React.useState("");
+  const [estoqueMinimo, setEstoqueMinimo] = React.useState("");
+
+  const [listaProdutos, setListaProdutos] = React.useState(() => {
+    const dadosSalvos = localStorage.getItem("produtosAgro");
+    return dadosSalvos ? JSON.parse(dadosSalvos) : [];
+  });
+
+  const [estoqueAtual, setEstoqueAtual] = React.useState("");
+  const [editandoId, setEditandoId] = React.useState(null);
+  const [produtoMovimento, setProdutoMovimento] = React.useState(null);
+  const [tipoMovimento, setTipoMovimento] = React.useState(null);
+  const [valorMovimento, setValorMovimento] = React.useState("");
+  const [notificacao, setNotificacao] = React.useState(null);
 
   React.useEffect(() => {
     async function carregarPrevisao() {
@@ -47,9 +80,11 @@ export default function PainelAgricultor({ onNavigate }) {
         const response = await fetch(
           "https://api.open-meteo.com/v1/forecast?latitude=-23.563039&longitude=-46.635854&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,uv_index_max&hourly=temperature_2m,precipitation,cloudcover,windspeed_10m&forecast_days=4&timezone=America%2FSao_Paulo"
         );
+
         if (!response.ok) {
           return;
         }
+
         const data = await response.json();
 
         if (!data.daily || !data.hourly) {
@@ -92,9 +127,11 @@ export default function PainelAgricultor({ onNavigate }) {
           }
 
           const detalhesHorario = [];
+
           hourlyTime.forEach((timeStr, idxHora) => {
             if (timeStr.startsWith(diaIso)) {
-              const hora = timeStr.split("T")[1]; // "HH:MM"
+              const hora = timeStr.split("T")[1];
+
               detalhesHorario.push({
                 horario: hora,
                 temperatura: hourlyTemperature[idxHora],
@@ -108,18 +145,17 @@ export default function PainelAgricultor({ onNavigate }) {
           const mediaChuvaHorario =
             detalhesHorario.length > 0
               ? detalhesHorario.reduce((acc, item) => acc + item.chuva, 0) /
-              detalhesHorario.length
+                detalhesHorario.length
               : 0;
 
           const mediaNuvensHorario =
             detalhesHorario.length > 0
               ? detalhesHorario.reduce((acc, item) => acc + item.nuvens, 0) /
-              detalhesHorario.length
+                detalhesHorario.length
               : 0;
 
           let icon = "☀️";
 
-          // Ícone baseado em chuva
           if (mediaChuvaHorario >= 5) {
             icon = "🌧️";
           } else if (mediaChuvaHorario >= 1) {
@@ -128,12 +164,11 @@ export default function PainelAgricultor({ onNavigate }) {
             icon = "⛅";
           }
 
-          // Ícone baseado no percentual médio de nuvens
           if (mediaChuvaHorario === 0) {
             if (mediaNuvensHorario >= 80) {
-              icon = "☁️"; // bem nublado
+              icon = "☁️";
             } else if (mediaNuvensHorario >= 40) {
-              icon = "⛅"; // parcialmente nublado
+              icon = "⛅";
             }
           }
 
@@ -142,40 +177,53 @@ export default function PainelAgricultor({ onNavigate }) {
             dia: labelDia,
             icon,
             temp: `${tempMin}°C / ${tempMax}°C`,
-            descricao: `Chuva no dia: ${chuvaDia.toFixed(1)} mm · UV máx: ${uvMax.toFixed(
+            descricao: `Chuva no dia: ${chuvaDia.toFixed(
               1
-            )}`,
+            )} mm · UV máx: ${uvMax.toFixed(1)}`,
             detalhesHorario,
           };
         });
 
         setPrevisaoTempo(itensPrevisao);
-      } catch (error) { }
+      } catch (error) {}
     }
 
     carregarPrevisao();
   }, []);
 
-  const [nome, setNome] = React.useState("");
-  const [unidade, setUnidade] = React.useState("Kg");
-  const [validade, setValidade] = React.useState("");
-  const [estoqueMinimo, setEstoqueMinimo] = React.useState("");
+  const obterStatusEstoque = (produto) => {
+    const atual = Number(produto.estoqueAtual || 0);
+    const minimo = Number(produto.estoqueMinimo || 0);
 
-  const [listaProdutos, setListaProdutos] = React.useState(() => {
-    const dadosSalvos = localStorage.getItem("produtosAgro");
-    return dadosSalvos ? JSON.parse(dadosSalvos) : [];
-  });
+    if (atual <= 0) {
+      return {
+        nivel: "ZERADO",
+        icon: "🚨",
+        titulo: "Estoque Zerado",
+        descricao: `O estoque de ${produto.nome} está zerado. Estoque atual: ${atual} ${produto.unidade}. Reposição urgente.`,
+      };
+    }
 
-  const [estoqueAtual, setEstoqueAtual] = React.useState("");
-  const [editandoId, setEditandoId] = React.useState(null);
-  const [produtoMovimento, setProdutoMovimento] = React.useState(null);
-  const [tipoMovimento, setTipoMovimento] = React.useState(null); // "entrada" | "baixa"
-  const [valorMovimento, setValorMovimento] = React.useState("");
-  const [notificacao, setNotificacao] = React.useState(null);
+    if (minimo > 0 && atual <= minimo) {
+      return {
+        nivel: "BAIXO",
+        icon: "📉",
+        titulo: "Estoque Baixo",
+        descricao: `Estoque de ${produto.nome} está baixo. Estoque atual: ${atual} ${produto.unidade}. Estoque mínimo: ${minimo} ${produto.unidade}.`,
+      };
+    }
+
+    return {
+      nivel: "NORMAL",
+      icon: "✅",
+      titulo: "Estoque Normal",
+      descricao: `O produto ${produto.nome} está com estoque em nível normal.`,
+    };
+  };
 
   const handleExcluir = (idParaRemover) => {
     setListaProdutos(
-      listaProdutos.filter((produto) => produto.id !== idParaRemover),
+      listaProdutos.filter((produto) => produto.id !== idParaRemover)
     );
   };
 
@@ -199,14 +247,37 @@ export default function PainelAgricultor({ onNavigate }) {
     console.log("Dados salvos no LocalStorage!");
   }, [listaProdutos]);
 
+  React.useEffect(() => {
+    const alertasEstoque = listaProdutos
+      .map((produto) => {
+        const status = obterStatusEstoque(produto);
+
+        if (status.nivel === "NORMAL") {
+          return null;
+        }
+
+        return {
+          id: `estoque-${produto.id}`,
+          icon: status.icon,
+          titulo: status.titulo,
+          descricao: status.descricao,
+        };
+      })
+      .filter(Boolean);
+
+    setAlertas([...alertasFixos, ...alertasEstoque]);
+  }, [listaProdutos]);
+
   const handleCadastrar = () => {
     if (nome === "" || estoqueAtual === "") {
       setNotificacao({
         tipo: "erro",
-        mensagem: "Por favor, preencha o nome e o estoque atual antes de cadastrar!",
+        mensagem:
+          "Por favor, preencha o nome e o estoque atual antes de cadastrar!",
       });
       return;
     }
+
     if (editandoId) {
       const listaAtualizada = listaProdutos.map((produto) => {
         if (produto.id === editandoId) {
@@ -254,6 +325,7 @@ export default function PainelAgricultor({ onNavigate }) {
 
   const darEntradaProduto = (idProduto) => {
     const valor = Number(valorMovimento.replace(",", "."));
+
     if (Number.isNaN(valor) || valor <= 0) {
       setNotificacao({
         tipo: "erro",
@@ -265,13 +337,16 @@ export default function PainelAgricultor({ onNavigate }) {
     setListaProdutos((produtosAnteriores) =>
       produtosAnteriores.map((produto) => {
         if (produto.id !== idProduto) return produto;
+
         const estoqueAtualNumero = Number(produto.estoqueAtual || 0);
+
         return {
           ...produto,
           estoqueAtual: estoqueAtualNumero + valor,
         };
-      }),
+      })
     );
+
     setNotificacao({
       tipo: "sucesso",
       mensagem: "Entrada de estoque registrada com sucesso!",
@@ -280,6 +355,7 @@ export default function PainelAgricultor({ onNavigate }) {
 
   const darBaixaProduto = (idProduto) => {
     const valor = Number(valorMovimento.replace(",", "."));
+
     if (Number.isNaN(valor) || valor <= 0) {
       setNotificacao({
         tipo: "erro",
@@ -288,23 +364,49 @@ export default function PainelAgricultor({ onNavigate }) {
       return;
     }
 
+    const produtoSelecionado = listaProdutos.find(
+      (produto) => produto.id === idProduto
+    );
+
+    if (!produtoSelecionado) {
+      setNotificacao({
+        tipo: "erro",
+        mensagem: "Produto não encontrado.",
+      });
+      return;
+    }
+
+    const estoqueAtualNumero = Number(produtoSelecionado.estoqueAtual || 0);
+    const novoEstoque = estoqueAtualNumero - valor;
+
+    if (novoEstoque < 0) {
+      setNotificacao({
+        tipo: "erro",
+        mensagem:
+          "A quantidade em estoque não pode ficar menor que zero. Ajuste o valor da baixa.",
+      });
+      return;
+    }
+
     setListaProdutos((produtosAnteriores) =>
       produtosAnteriores.map((produto) => {
         if (produto.id !== idProduto) return produto;
-        const estoqueAtualNumero = Number(produto.estoqueAtual || 0);
-        if (estoqueAtualNumero - valor < 0) {
-          setNotificacao({
-            tipo: "erro",
-            mensagem: "A quantidade em estoque não pode ficar menor que zero.",
-          });
-          return produto;
-        }
+
         return {
           ...produto,
-          estoqueAtual: estoqueAtualNumero - valor,
+          estoqueAtual: novoEstoque,
         };
-      }),
+      })
     );
+
+    if (novoEstoque === 0) {
+      setNotificacao({
+        tipo: "erro",
+        mensagem: `O estoque de ${produtoSelecionado.nome} foi zerado.`,
+      });
+      return;
+    }
+
     setNotificacao({
       tipo: "sucesso",
       mensagem: "Baixa de estoque registrada com sucesso!",
@@ -313,7 +415,7 @@ export default function PainelAgricultor({ onNavigate }) {
 
   const abrirModalMovimento = (produto, tipo) => {
     setProdutoMovimento(produto);
-    setTipoMovimento(tipo); // "entrada" ou "baixa"
+    setTipoMovimento(tipo);
     setValorMovimento("");
   };
 
@@ -356,6 +458,7 @@ export default function PainelAgricultor({ onNavigate }) {
           </button>
         </div>
       )}
+
       <nav>
         <div className="logo">
           <img
@@ -391,13 +494,18 @@ export default function PainelAgricultor({ onNavigate }) {
       <main>
         <section className="section">
           <h2 className="section-title">☀️ Previsão do Tempo</h2>
+
           <div className="cards-grid">
             {previsaoTempo.map((item) => (
               <div
                 key={item.id}
-                className={`card ${diaSelecionadoId === item.id ? "card-selecionado" : ""}`}
+                className={`card ${
+                  diaSelecionadoId === item.id ? "card-selecionado" : ""
+                }`}
                 onClick={() =>
-                  setDiaSelecionadoId((prev) => (prev === item.id ? null : item.id))
+                  setDiaSelecionadoId((prev) =>
+                    prev === item.id ? null : item.id
+                  )
                 }
                 style={{ cursor: "pointer" }}
               >
@@ -408,6 +516,7 @@ export default function PainelAgricultor({ onNavigate }) {
               </div>
             ))}
           </div>
+
           {diaSelecionadoId && (
             <div
               className="previsao-detalhada"
@@ -417,7 +526,9 @@ export default function PainelAgricultor({ onNavigate }) {
                 const diaSelecionado = previsaoTempo.find(
                   (dia) => dia.id === diaSelecionadoId
                 );
+
                 if (!diaSelecionado) return null;
+
                 return (
                   <div
                     className="previsao-detalhada-conteudo"
@@ -436,10 +547,16 @@ export default function PainelAgricultor({ onNavigate }) {
                         ×
                       </button>
                     </div>
+
                     <div className="previsao-detalhada-lista">
                       {diaSelecionado.detalhesHorario.map((hora) => (
-                        <div key={hora.horario} className="previsao-detalhada-item">
-                          <span className="previsao-detalhada-hora">{hora.horario}</span>
+                        <div
+                          key={hora.horario}
+                          className="previsao-detalhada-item"
+                        >
+                          <span className="previsao-detalhada-hora">
+                            {hora.horario}
+                          </span>
                           <span className="previsao-detalhada-temp">
                             {hora.temperatura.toFixed(1)}°C
                           </span>
@@ -464,6 +581,7 @@ export default function PainelAgricultor({ onNavigate }) {
 
         <section className="section section-cadastro">
           <h2 className="section-title">🚜 Cadastrar Nova Colheita</h2>
+
           <div className="card">
             <div className="input-group">
               <label>Nome do Produto</label>
@@ -534,66 +652,87 @@ export default function PainelAgricultor({ onNavigate }) {
             <h2 className="section-title">📊 Resumo da Produção</h2>
 
             <div className="cards-grid">
-              {listaProdutos.map((produto) => (
-                <div key={produto.id} className="card card-produto">
-                  <div className="card-produto-actions">
-                    <button
-                      type="button"
-                      className="card-produto-action-btn"
-                      onClick={() => handleEditar(produto)}
-                      aria-label="Editar produto"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      type="button"
-                      className="card-produto-action-btn card-produto-action-btn-delete"
-                      onClick={() => handleExcluir(produto.id)}
-                      aria-label="Excluir produto"
-                    >
-                      🗑️
-                    </button>
+              {listaProdutos.map((produto) => {
+                const status = obterStatusEstoque(produto);
+
+                return (
+                  <div key={produto.id} className="card card-produto">
+                    <div className="card-produto-actions">
+                      <button
+                        type="button"
+                        className="card-produto-action-btn"
+                        onClick={() => handleEditar(produto)}
+                        aria-label="Editar produto"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        type="button"
+                        className="card-produto-action-btn card-produto-action-btn-delete"
+                        onClick={() => handleExcluir(produto.id)}
+                        aria-label="Excluir produto"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+
+                    <span className="card-icon">{produto.icon}</span>
+                    <h3>{produto.nome}</h3>
+
+                    <p className="card-estoque">
+                      Estoque atual:{" "}
+                      {produto.estoqueAtual !== undefined &&
+                      produto.estoqueAtual !== null
+                        ? `${produto.estoqueAtual} ${produto.unidade}`
+                        : `0 ${produto.unidade}`}
+                    </p>
+
+                    <p className="card-desc">
+                      Nível do estoque: <strong>{status.nivel}</strong>
+                    </p>
+
+                    <div className="buttons-group buttons-estoque">
+                      <button
+                        type="button"
+                        className="btn btn-estoque btn-entrada"
+                        onClick={() => abrirModalMovimento(produto, "entrada")}
+                      >
+                        Dar Entrada
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-estoque btn-baixa"
+                        onClick={() => abrirModalMovimento(produto, "baixa")}
+                      >
+                        Dar Baixa
+                      </button>
+                    </div>
                   </div>
-                  <span className="card-icon">{produto.icon}</span>
-                  <h3>{produto.nome}</h3>
-                  <p className="card-estoque">
-                    Estoque atual:{" "}
-                    {produto.estoqueAtual !== undefined && produto.estoqueAtual !== null
-                      ? `${produto.estoqueAtual} ${produto.unidade}`
-                      : `0 ${produto.unidade}`}
-                  </p>
-                  <div className="buttons-group buttons-estoque">
-                    <button
-                      type="button"
-                      className="btn btn-estoque btn-entrada"
-                      onClick={() => abrirModalMovimento(produto, "entrada")}
-                    >
-                      Dar Entrada
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-estoque btn-baixa"
-                      onClick={() => abrirModalMovimento(produto, "baixa")}
-                    >
-                      Dar Baixa
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
 
         <section className="section">
           <h2 className="section-title">⚠️ Alertas Importantes</h2>
+
           <div className="cards-grid">
-            {alertas.map((alerta) => (
-              <div key={alerta.id} className="card card-alerta">
-                <span className="card-icon">{alerta.icon}</span>
-                <h3>{alerta.titulo}</h3>
-                <p>{alerta.descricao}</p>
+            {alertas.length > 0 ? (
+              alertas.map((alerta) => (
+                <div key={alerta.id} className="card card-alerta">
+                  <span className="card-icon">{alerta.icon}</span>
+                  <h3>{alerta.titulo}</h3>
+                  <p>{alerta.descricao}</p>
+                </div>
+              ))
+            ) : (
+              <div className="card card-alerta">
+                <span className="card-icon">✅</span>
+                <h3>Sem alertas no momento</h3>
+                <p>Todos os produtos estão com estoque em nível adequado.</p>
               </div>
-            ))}
+            )}
           </div>
         </section>
       </main>
@@ -605,17 +744,22 @@ export default function PainelAgricultor({ onNavigate }) {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="modal-movimento-titulo">
-              {tipoMovimento === "entrada" ? "Dar Entrada em Estoque" : "Dar Baixa em Estoque"}
+              {tipoMovimento === "entrada"
+                ? "Dar Entrada em Estoque"
+                : "Dar Baixa em Estoque"}
             </h3>
+
             <p className="modal-movimento-subtitulo">
               Produto: <strong>{produtoMovimento.nome}</strong>
             </p>
+
             <p className="modal-movimento-estoque-atual">
               Estoque atual:{" "}
               <strong>
                 {produtoMovimento.estoqueAtual ?? 0} {produtoMovimento.unidade}
               </strong>
             </p>
+
             <div className="input-group modal-movimento-input">
               <label>
                 Quantidade para{" "}
@@ -636,6 +780,7 @@ export default function PainelAgricultor({ onNavigate }) {
                 }}
               />
             </div>
+
             <div className="modal-movimento-acoes">
               <button
                 type="button"
