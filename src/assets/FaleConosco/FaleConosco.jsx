@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./FaleConosco.css";
 
 export default function FaleConosco({ onNavigate }) {

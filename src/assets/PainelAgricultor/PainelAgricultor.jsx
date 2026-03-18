@@ -11,51 +11,12 @@ const alertasFixos = [
   },
 ];
 
-const calculadoraValores = {
-  area: 10,
-  produtividade: 5.5,
-  preco: 1200,
-  producaoTotal: "55.00 t",
-  receitaEstimada: "R$ 66.000,00",
-  mediaPorHa: "R$ 6.600,00",
-};
-
 export default function PainelAgricultor({ onNavigate }) {
   const previsaoTempoInicial = [];
 
   const [previsaoTempo, setPrevisaoTempo] =
     React.useState(previsaoTempoInicial);
   const [diaSelecionadoId, setDiaSelecionadoId] = React.useState(null);
-  const alertas = React.useMemo(() => {
-  const alertasEstoque = listaProdutos
-    .map((produto) => {
-      const atual = Number(produto.estoqueAtual || 0);
-      const minimo = Number(produto.estoqueMinimo || 0);
-
-      if (atual <= 0) {
-        return {
-          id: `estoque-${produto.id}`,
-          icon: "🚨",
-          titulo: "Estoque Zerado",
-          descricao: `O produto ${produto.nome} está com estoque zerado. Estoque atual: ${atual} ${produto.unidade}. Reposição urgente.`,
-        };
-      }
-
-      if (minimo > 0 && atual <= minimo) {
-        return {
-          id: `estoque-${produto.id}`,
-          icon: "📉",
-          titulo: "Estoque Baixo",
-          descricao: `Estoque de ${produto.nome} está baixo. Estoque atual: ${atual} ${produto.unidade}. Estoque mínimo: ${minimo} ${produto.unidade}.`,
-        };
-      }
-
-      return null;
-    })
-    .filter(Boolean);
-
-  return [...alertasFixos, ...alertasEstoque];
-}, [listaProdutos]);
 
   const [nome, setNome] = React.useState("");
   const [unidade, setUnidade] = React.useState("Kg");
@@ -66,6 +27,37 @@ export default function PainelAgricultor({ onNavigate }) {
     const dadosSalvos = localStorage.getItem("produtosAgro");
     return dadosSalvos ? JSON.parse(dadosSalvos) : [];
   });
+
+  const alertas = React.useMemo(() => {
+    const alertasEstoque = listaProdutos
+      .map((produto) => {
+        const atual = Number(produto.estoqueAtual || 0);
+        const minimo = Number(produto.estoqueMinimo || 0);
+
+        if (atual <= 0) {
+          return {
+            id: `estoque-${produto.id}`,
+            icon: "🚨",
+            titulo: "Estoque Zerado",
+            descricao: `O produto ${produto.nome} está com estoque zerado. Estoque atual: ${atual} ${produto.unidade}. Reposição urgente.`,
+          };
+        }
+
+        if (minimo > 0 && atual < minimo) {
+          return {
+            id: `estoque-${produto.id}`,
+            icon: "📉",
+            titulo: "Estoque Baixo",
+            descricao: `Estoque de ${produto.nome} está baixo. Estoque atual: ${atual} ${produto.unidade}. Estoque mínimo: ${minimo} ${produto.unidade}.`,
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
+    return [...alertasFixos, ...alertasEstoque];
+  }, [listaProdutos]);
 
   const [estoqueAtual, setEstoqueAtual] = React.useState("");
   const [editandoId, setEditandoId] = React.useState(null);
@@ -145,13 +137,13 @@ export default function PainelAgricultor({ onNavigate }) {
           const mediaChuvaHorario =
             detalhesHorario.length > 0
               ? detalhesHorario.reduce((acc, item) => acc + item.chuva, 0) /
-                detalhesHorario.length
+              detalhesHorario.length
               : 0;
 
           const mediaNuvensHorario =
             detalhesHorario.length > 0
               ? detalhesHorario.reduce((acc, item) => acc + item.nuvens, 0) /
-                detalhesHorario.length
+              detalhesHorario.length
               : 0;
 
           let icon = "☀️";
@@ -185,15 +177,17 @@ export default function PainelAgricultor({ onNavigate }) {
         });
 
         setPrevisaoTempo(itensPrevisao);
-      } catch (error) {}
+      } catch {
+        // Sem ação: falha ao carregar previsão meteorológica não deve quebrar a tela.
+      }
     }
 
     carregarPrevisao();
   }, []);
 
-  const obterStatusEstoque = (produto) => {
-    const atual = Number(produto.estoqueAtual || 0);
-    const minimo = Number(produto.estoqueMinimo || 0);
+  const obterStatusEstoque = React.useCallback((produto) => {
+    const atual = Number(produto.estoqueAtual ?? 0);
+    const minimo = Number(produto.estoqueMinimo ?? 0);
 
     if (atual <= 0) {
       return {
@@ -204,7 +198,7 @@ export default function PainelAgricultor({ onNavigate }) {
       };
     }
 
-    if (minimo > 0 && atual <= minimo) {
+    if (minimo > 0 && atual < minimo) {
       return {
         nivel: "BAIXO",
         icon: "📉",
@@ -219,7 +213,58 @@ export default function PainelAgricultor({ onNavigate }) {
       titulo: "Estoque Normal",
       descricao: `O produto ${produto.nome} está com estoque em nível normal.`,
     };
-  };
+  }, []);
+
+  // Watch: dispara toast quando o status de estoque do produto muda
+  // (ex.: NORMAL -> BAIXO ou qualquer -> ZERADO).
+  const estoqueStatusAnteriorRef = React.useRef(new Map());
+  React.useEffect(() => {
+    const anterior = estoqueStatusAnteriorRef.current;
+    const proximo = new Map();
+
+    const novosZerados = [];
+    const novosBaixos = [];
+
+    listaProdutos.forEach((produto) => {
+      const status = obterStatusEstoque(produto).nivel;
+      proximo.set(produto.id, status);
+
+      const statusAnterior = anterior.get(produto.id);
+      if (statusAnterior === status) return;
+
+      if (status === "ZERADO") novosZerados.push(produto);
+      if (status === "BAIXO") novosBaixos.push(produto);
+    });
+
+    estoqueStatusAnteriorRef.current = proximo;
+
+    if (novosZerados.length > 0) {
+      const nomes = novosZerados
+        .slice(0, 3)
+        .map((p) => p.nome)
+        .join(", ");
+      const extra = novosZerados.length > 3 ? ` (+${novosZerados.length - 3})` : "";
+
+      setNotificacao({
+        tipo: "erro",
+        mensagem: `🚨 Alerta crítico: ${novosZerados.length} produto(s) com estoque zerado (${nomes}${extra}).`,
+      });
+      return;
+    }
+
+    if (novosBaixos.length > 0) {
+      const nomes = novosBaixos
+        .slice(0, 3)
+        .map((p) => p.nome)
+        .join(", ");
+      const extra = novosBaixos.length > 3 ? ` (+${novosBaixos.length - 3})` : "";
+
+      setNotificacao({
+        tipo: "erro",
+        mensagem: `📉 Alerta: ${novosBaixos.length} produto(s) com estoque abaixo do mínimo (${nomes}${extra}).`,
+      });
+    }
+  }, [listaProdutos, obterStatusEstoque]);
 
   const handleExcluir = (idParaRemover) => {
     setListaProdutos(
@@ -245,27 +290,6 @@ export default function PainelAgricultor({ onNavigate }) {
     const listaEmTexto = JSON.stringify(listaProdutos);
     localStorage.setItem("produtosAgro", listaEmTexto);
     console.log("Dados salvos no LocalStorage!");
-  }, [listaProdutos]);
-
-  React.useEffect(() => {
-    const alertasEstoque = listaProdutos
-      .map((produto) => {
-        const status = obterStatusEstoque(produto);
-
-        if (status.nivel === "NORMAL") {
-          return null;
-        }
-
-        return {
-          id: `estoque-${produto.id}`,
-          icon: status.icon,
-          titulo: status.titulo,
-          descricao: status.descricao,
-        };
-      })
-      .filter(Boolean);
-
-    setAlertas([...alertasFixos, ...alertasEstoque]);
   }, [listaProdutos]);
 
   const handleCadastrar = () => {
@@ -400,10 +424,6 @@ export default function PainelAgricultor({ onNavigate }) {
     );
 
     if (novoEstoque === 0) {
-      setNotificacao({
-        tipo: "erro",
-        mensagem: `O estoque de ${produtoSelecionado.nome} foi zerado.`,
-      });
       return;
     }
 
@@ -499,9 +519,8 @@ export default function PainelAgricultor({ onNavigate }) {
             {previsaoTempo.map((item) => (
               <div
                 key={item.id}
-                className={`card ${
-                  diaSelecionadoId === item.id ? "card-selecionado" : ""
-                }`}
+                className={`card ${diaSelecionadoId === item.id ? "card-selecionado" : ""
+                  }`}
                 onClick={() =>
                   setDiaSelecionadoId((prev) =>
                     prev === item.id ? null : item.id
@@ -605,18 +624,16 @@ export default function PainelAgricultor({ onNavigate }) {
               </select>
             </div>
 
-            {unidade !== "un" && (
-              <div className="input-group">
-                <label>Estoque Atual ({unidade})</label>
-                <input
-                  type="number"
-                  placeholder="Ex: 120"
-                  value={estoqueAtual}
-                  onChange={(e) => setEstoqueAtual(e.target.value)}
-                  disabled={!!editandoId}
-                />
-              </div>
-            )}
+            <div className="input-group">
+              <label>Estoque Atual ({unidade})</label>
+              <input
+                type="number"
+                placeholder="Ex: 120"
+                value={estoqueAtual}
+                onChange={(e) => setEstoqueAtual(e.target.value)}
+                disabled={!!editandoId}
+              />
+            </div>
 
             <div className="input-group">
               <label>Prazo de Validade</label>
@@ -682,7 +699,7 @@ export default function PainelAgricultor({ onNavigate }) {
                     <p className="card-estoque">
                       Estoque atual:{" "}
                       {produto.estoqueAtual !== undefined &&
-                      produto.estoqueAtual !== null
+                        produto.estoqueAtual !== null
                         ? `${produto.estoqueAtual} ${produto.unidade}`
                         : `0 ${produto.unidade}`}
                     </p>
