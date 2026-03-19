@@ -28,6 +28,17 @@ export default function PainelAgricultor({ onNavigate }) {
     return dadosSalvos ? JSON.parse(dadosSalvos) : [];
   });
 
+const [historico, setHistorico] = React.useState(() => {
+    const dadosSalvos = localStorage.getItem("historicoAgro");
+    return dadosSalvos ? JSON.parse(dadosSalvos) : [];
+  });
+
+    React.useEffect(() => {
+    localStorage.setItem("historicoAgro", JSON.stringify(historico));
+  }, [historico]);
+
+  const [produtoHistoricoModal, setProdutoHistoricoModal] = React.useState(null);
+
   const alertas = React.useMemo(() => {
     const alertasEstoque = listaProdutos
       .map((produto) => {
@@ -433,6 +444,18 @@ export default function PainelAgricultor({ onNavigate }) {
     });
   };
 
+const registrarMovimentacao = (produto, tipo, quantidade) => {
+    const novaMovimentacao = {
+      id: Date.now(),
+      data: new Date().toLocaleString('pt-BR'),
+      produto: produto.nome,
+      tipo: tipo === 'entrada' ? 'Entrada' : 'Saída',
+      quantidade: quantidade,
+      unidade: produto.unidade
+    };
+    setHistorico([novaMovimentacao, ...historico]);
+  };
+
   const abrirModalMovimento = (produto, tipo) => {
     setProdutoMovimento(produto);
     setTipoMovimento(tipo);
@@ -448,13 +471,32 @@ export default function PainelAgricultor({ onNavigate }) {
   const confirmarMovimento = () => {
     if (!produtoMovimento || !tipoMovimento) return;
 
+    const valor = Number(valorMovimento.replace(",", "."));
+    if (Number.isNaN(valor) || valor <= 0) {
+      setNotificacao({ tipo: "erro", mensagem: "Valor inválido." });
+      return;
+    }
     if (tipoMovimento === "entrada") {
       darEntradaProduto(produtoMovimento.id);
+      registrarMovimentacao(produtoMovimento, 'entrada', valor);
     } else {
-      darBaixaProduto(produtoMovimento.id);
+      const estoqueAtual = Number(produtoMovimento.estoqueAtual || 0);
+      if (estoqueAtual - valor >= 0) {
+        darBaixaProduto(produtoMovimento.id);
+        registrarMovimentacao(produtoMovimento, 'baixa', valor);
+      } else {
+        return; 
+      }
     }
-
     fecharModalMovimento();
+  };
+
+  const abrirHistoricoProduto = (produto) => {
+    setProdutoHistoricoModal(produto);
+  };
+
+  const fecharHistoricoModal = () => {
+    setProdutoHistoricoModal(null);
   };
 
   return (
@@ -675,9 +717,20 @@ export default function PainelAgricultor({ onNavigate }) {
                 return (
                   <div key={produto.id} className="card card-produto">
                     <div className="card-produto-actions">
+
                       <button
                         type="button"
                         className="card-produto-action-btn"
+                        title="Ver histórico"
+                        onClick={() => abrirHistoricoProduto(produto)}
+                      >
+                        🕒
+                      </button>
+
+                      <button
+                        type="button"
+                        className="card-produto-action-btn"
+                        title="Editar"
                         onClick={() => handleEditar(produto)}
                         aria-label="Editar produto"
                       >
@@ -686,6 +739,7 @@ export default function PainelAgricultor({ onNavigate }) {
                       <button
                         type="button"
                         className="card-produto-action-btn card-produto-action-btn-delete"
+                        title="Excluir"
                         onClick={() => handleExcluir(produto.id)}
                         aria-label="Excluir produto"
                       >
@@ -797,7 +851,7 @@ export default function PainelAgricultor({ onNavigate }) {
                 }}
               />
             </div>
-
+            
             <div className="modal-movimento-acoes">
               <button
                 type="button"
@@ -821,7 +875,71 @@ export default function PainelAgricultor({ onNavigate }) {
           </div>
         </div>
       )}
+      {produtoHistoricoModal && (
+        <div className="modal-movimento-overlay" onClick={fecharHistoricoModal}>
+          <div 
+            className="modal-movimento" 
+            style={{ maxWidth: '550px' }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+              <h3 className="modal-movimento-titulo">
+                🕒 Histórico: {produtoHistoricoModal.nome}
+              </h3>
+              <button 
+                onClick={fecharHistoricoModal} 
+                style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}
+              >
+                ×
+              </button>
+            </div>
 
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
+                    <th style={{ padding: '8px' }}>Data</th>
+                    <th style={{ padding: '8px' }}>Ação</th>
+                    <th style={{ padding: '8px' }}>Qtd</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historico
+                    .filter(item => item.produto === produtoHistoricoModal.nome)
+                    .map((item) => (
+                      <tr key={item.id} style={{ borderBottom: '1px solid #f9f9f9' }}>
+                        <td style={{ padding: '8px' }}>{item.data}</td>
+                        <td style={{ 
+                          padding: '8px', 
+                          color: item.tipo === 'Entrada' ? '#2e7d32' : '#c62828',
+                          fontWeight: 'bold' 
+                        }}>
+                          {item.tipo}
+                        </td>
+                        <td style={{ padding: '8px' }}>{item.quantidade} {item.unidade}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+              
+              {historico.filter(item => item.produto === produtoHistoricoModal.nome).length === 0 && (
+                <p style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                  Sem registros para este item.
+                </p>
+              )}
+            </div>
+
+            <div style={{ marginTop: '20px', textAlign: 'right' }}>
+              <button 
+                className="btn btn-estoque btn-cancelar-movimento" 
+                onClick={fecharHistoricoModal}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}  
       <footer>
         <div className="footer-bottom">
           <p>© 2025 AgroConnect. Transformando a agricultura.</p>
