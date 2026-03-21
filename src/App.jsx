@@ -13,6 +13,7 @@ function App() {
       {currentPage === 'cadastro' && <Cadastro onNavigate={setCurrentPage} />}
       {currentPage === 'fale-conosco' && <FaleConosco onNavigate={setCurrentPage} />}
       {currentPage === 'painel-agricultor' && <PainelAgricultor onNavigate={setCurrentPage} />}
+      {currentPage === 'familia' && <Familia onNavigate={setCurrentPage} />}
     </div>
   );
 }
