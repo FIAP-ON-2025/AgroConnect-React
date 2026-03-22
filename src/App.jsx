@@ -5,7 +5,7 @@ import Cadastro from "./assets/Cadastro/cadastro";
 import PainelAgricultor from "./assets/PainelAgricultor/PainelAgricultor";
 import Familia from "./assets/Familia/Familia";
 
-function App() {n
+function App() {
   const [currentPage, setCurrentPage] = useState('home');
 
   return (
