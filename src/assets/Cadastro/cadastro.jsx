@@ -1,6 +1,6 @@
 import "../Cadastro/cadastro.css";
 
-function Cadastro({ onNavigate }) {
+export default function Cadastro({ onNavigate }) {
   return (
     <>
       <nav>
@@ -16,6 +16,7 @@ function Cadastro({ onNavigate }) {
           <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Início</a></li>
           <li><a onClick={() => onNavigate('cadastro')} style={{ cursor: 'pointer' }}>Cadastre-se</a></li>
           <li><a onClick={() => onNavigate('fale-conosco')} style={{ cursor: 'pointer' }}>Fale Conosco</a></li>
+          <li><a onClick={() => onNavigate('Familia')} style={{ cursor: 'pointer' }}>Finalizar Cadastro</a></li>
         </ul>
       </nav>
 
@@ -124,7 +125,8 @@ function Cadastro({ onNavigate }) {
                 </div>
 
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={() => onNavigate('Familia')}
                   className="btn btn-primary"
                   style={{ width: "100%", marginTop: "30px", fontSize: "1.05em" }}
                 >
@@ -154,4 +156,3 @@ function Cadastro({ onNavigate }) {
   );
 }
 
-export default Cadastro;

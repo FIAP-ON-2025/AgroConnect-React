@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import "./Familia.css";
 
 export default function Familia() {
   const [produtoSelecionado, setProdutoSelecionado] = useState("[Nome do Produto]");
@@ -134,7 +135,7 @@ export default function Familia() {
         </section>
       </main>
 
-      <div ref={modalRef}>
+      <div ref={modalRef} className="modal-simples">
         <h2>{produtoSelecionado}</h2>
 
         <form onSubmit={handleSubmit}>
