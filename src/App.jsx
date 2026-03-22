@@ -3,6 +3,7 @@ import FaleConosco from './assets/FaleConosco/FaleConosco';
 import Home from "./assets/Home/Home";
 import Cadastro from "./assets/Cadastro/cadastro";
 import PainelAgricultor from "./assets/PainelAgricultor/PainelAgricultor";
+import Familia from "./assets/Familia/Familia";
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -13,7 +14,7 @@ function App() {
       {currentPage === 'cadastro' && <Cadastro onNavigate={setCurrentPage} />}
       {currentPage === 'fale-conosco' && <FaleConosco onNavigate={setCurrentPage} />}
       {currentPage === 'painel-agricultor' && <PainelAgricultor onNavigate={setCurrentPage} />}
-      {currentPage === 'familia' && <Familia onNavigate={setCurrentPage} />}
+      {currentPage === 'Familia' && <Familia onNavigate={setCurrentPage} />}
     </div>
   );
 }
