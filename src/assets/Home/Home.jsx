@@ -15,7 +15,8 @@ export default function Home({ onNavigate }) {
 
         <ul className="nav-links">
           <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Início</a></li>
-          <li><a onClick={() => onNavigate('painel-agricultor')} style={{ cursor: 'pointer' }}>Painel</a></li>
+          <li><a onClick={() => onNavigate('painel-agricultor')} style={{ cursor: 'pointer' }}>Painel Agricultor</a></li>
+          <li><a onClick={() => onNavigate('painel-comerciante')} style={{ cursor: 'pointer' }}>Painel Comerciante</a></li>
           <li><a onClick={() => onNavigate('cadastro')} style={{ cursor: 'pointer' }}>Cadastre-se</a></li>
           <li><a onClick={() => onNavigate('fale-conosco')} style={{ cursor: 'pointer' }}>Fale Conosco</a></li>
         </ul>

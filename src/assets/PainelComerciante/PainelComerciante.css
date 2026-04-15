@@ -1,0 +1,81 @@
+.comerciante-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.agricultores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.agricultor-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border-top: 5px solid #2e7d32; /* Verde Agro */
+}
+
+.agri-header h3 {
+  margin: 0;
+  color: #2e7d32;
+}
+
+.agri-header span {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.produto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.btn-reservar {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-reservar:hover {
+  background-color: #388e3c;
+}
+
+.btn-entrada {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-left: 8px;
+}
+
+.btn-entrada:hover {
+  background-color: #388e3c;
+}
+
+.item-reserva {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.minhas-reservas {
+  margin-top: 40px;
+  background: #f1f8e9;
+  padding: 20px;
+  border-radius: 15px;
+}
