@@ -11,7 +11,11 @@ const alertasFixos = [
   },
 ];
 
-export default function PainelAgricultor({ onNavigate }) {
+export default function PainelAgricultor({
+  onNavigate,
+  perfilAtivo,
+  notificacoesExternas,
+}) {
   const previsaoTempoInicial = [];
 
   const [previsaoTempo, setPrevisaoTempo] =
@@ -28,16 +32,17 @@ export default function PainelAgricultor({ onNavigate }) {
     return dadosSalvos ? JSON.parse(dadosSalvos) : [];
   });
 
-const [historico, setHistorico] = React.useState(() => {
+  const [historico, setHistorico] = React.useState(() => {
     const dadosSalvos = localStorage.getItem("historicoAgro");
     return dadosSalvos ? JSON.parse(dadosSalvos) : [];
   });
 
-    React.useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem("historicoAgro", JSON.stringify(historico));
   }, [historico]);
 
-  const [produtoHistoricoModal, setProdutoHistoricoModal] = React.useState(null);
+  const [produtoHistoricoModal, setProdutoHistoricoModal] =
+    React.useState(null);
 
   const alertas = React.useMemo(() => {
     const alertasEstoque = listaProdutos
@@ -67,8 +72,18 @@ const [historico, setHistorico] = React.useState(() => {
       })
       .filter(Boolean);
 
-    return [...alertasFixos, ...alertasEstoque];
-  }, [listaProdutos]);
+    const alertasReservas = (notificacoesExternas || [])
+      .filter((n) => n.agriNome === perfilAtivo?.nome)
+      .map((n) => ({
+        id: `reserva-${n.id}`,
+        icon: "📦",
+        titulo: "Nova Reserva Recebida!",
+        descricao: `${n.comerciante} reservou ${n.prodNome} às ${n.data}.`,
+      }));
+
+    // Retornamos tudo junto: Clima (fixo), Estoque e as Reservas
+    return [...alertasFixos, ...alertasEstoque, ...alertasReservas];
+  }, [listaProdutos, notificacoesExternas, perfilAtivo]);
 
   const [estoqueAtual, setEstoqueAtual] = React.useState("");
   const [editandoId, setEditandoId] = React.useState(null);
@@ -78,10 +93,23 @@ const [historico, setHistorico] = React.useState(() => {
   const [notificacao, setNotificacao] = React.useState(null);
 
   React.useEffect(() => {
+    if (notificacoesExternas && notificacoesExternas.length > 0) {
+      const ultimaNotificacao = notificacoesExternas[0];
+
+      if (ultimaNotificacao.agriNome === perfilAtivo?.nome) {
+        setNotificacao({
+          tipo: "sucesso",
+          mensagem: `🆕 Nova Reserva: ${ultimaNotificacao.comerciante} reservou ${ultimaNotificacao.prodNome}!`,
+        });
+      }
+    }
+  }, [notificacoesExternas, perfilAtivo]);
+
+  React.useEffect(() => {
     async function carregarPrevisao() {
       try {
         const response = await fetch(
-          "https://api.open-meteo.com/v1/forecast?latitude=-23.563039&longitude=-46.635854&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,uv_index_max&hourly=temperature_2m,precipitation,cloudcover,windspeed_10m&forecast_days=4&timezone=America%2FSao_Paulo"
+          "https://api.open-meteo.com/v1/forecast?latitude=-23.563039&longitude=-46.635854&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,uv_index_max&hourly=temperature_2m,precipitation,cloudcover,windspeed_10m&forecast_days=4&timezone=America%2FSao_Paulo",
         );
 
         if (!response.ok) {
@@ -148,13 +176,13 @@ const [historico, setHistorico] = React.useState(() => {
           const mediaChuvaHorario =
             detalhesHorario.length > 0
               ? detalhesHorario.reduce((acc, item) => acc + item.chuva, 0) /
-              detalhesHorario.length
+                detalhesHorario.length
               : 0;
 
           const mediaNuvensHorario =
             detalhesHorario.length > 0
               ? detalhesHorario.reduce((acc, item) => acc + item.nuvens, 0) /
-              detalhesHorario.length
+                detalhesHorario.length
               : 0;
 
           let icon = "☀️";
@@ -181,7 +209,7 @@ const [historico, setHistorico] = React.useState(() => {
             icon,
             temp: `${tempMin}°C / ${tempMax}°C`,
             descricao: `Chuva no dia: ${chuvaDia.toFixed(
-              1
+              1,
             )} mm · UV máx: ${uvMax.toFixed(1)}`,
             detalhesHorario,
           };
@@ -254,7 +282,8 @@ const [historico, setHistorico] = React.useState(() => {
         .slice(0, 3)
         .map((p) => p.nome)
         .join(", ");
-      const extra = novosZerados.length > 3 ? ` (+${novosZerados.length - 3})` : "";
+      const extra =
+        novosZerados.length > 3 ? ` (+${novosZerados.length - 3})` : "";
 
       setNotificacao({
         tipo: "erro",
@@ -268,7 +297,8 @@ const [historico, setHistorico] = React.useState(() => {
         .slice(0, 3)
         .map((p) => p.nome)
         .join(", ");
-      const extra = novosBaixos.length > 3 ? ` (+${novosBaixos.length - 3})` : "";
+      const extra =
+        novosBaixos.length > 3 ? ` (+${novosBaixos.length - 3})` : "";
 
       setNotificacao({
         tipo: "erro",
@@ -279,7 +309,7 @@ const [historico, setHistorico] = React.useState(() => {
 
   const handleExcluir = (idParaRemover) => {
     setListaProdutos(
-      listaProdutos.filter((produto) => produto.id !== idParaRemover)
+      listaProdutos.filter((produto) => produto.id !== idParaRemover),
     );
   };
 
@@ -379,7 +409,7 @@ const [historico, setHistorico] = React.useState(() => {
           ...produto,
           estoqueAtual: estoqueAtualNumero + valor,
         };
-      })
+      }),
     );
 
     setNotificacao({
@@ -400,7 +430,7 @@ const [historico, setHistorico] = React.useState(() => {
     }
 
     const produtoSelecionado = listaProdutos.find(
-      (produto) => produto.id === idProduto
+      (produto) => produto.id === idProduto,
     );
 
     if (!produtoSelecionado) {
@@ -431,7 +461,7 @@ const [historico, setHistorico] = React.useState(() => {
           ...produto,
           estoqueAtual: novoEstoque,
         };
-      })
+      }),
     );
 
     if (novoEstoque === 0) {
@@ -444,14 +474,14 @@ const [historico, setHistorico] = React.useState(() => {
     });
   };
 
-const registrarMovimentacao = (produto, tipo, quantidade) => {
+  const registrarMovimentacao = (produto, tipo, quantidade) => {
     const novaMovimentacao = {
       id: Date.now(),
-      data: new Date().toLocaleString('pt-BR'),
+      data: new Date().toLocaleString("pt-BR"),
       produto: produto.nome,
-      tipo: tipo === 'entrada' ? 'Entrada' : 'Saída',
+      tipo: tipo === "entrada" ? "Entrada" : "Saída",
       quantidade: quantidade,
-      unidade: produto.unidade
+      unidade: produto.unidade,
     };
     setHistorico([novaMovimentacao, ...historico]);
   };
@@ -478,14 +508,14 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
     }
     if (tipoMovimento === "entrada") {
       darEntradaProduto(produtoMovimento.id);
-      registrarMovimentacao(produtoMovimento, 'entrada', valor);
+      registrarMovimentacao(produtoMovimento, "entrada", valor);
     } else {
       const estoqueAtual = Number(produtoMovimento.estoqueAtual || 0);
       if (estoqueAtual - valor >= 0) {
         darBaixaProduto(produtoMovimento.id);
-        registrarMovimentacao(produtoMovimento, 'baixa', valor);
+        registrarMovimentacao(produtoMovimento, "baixa", valor);
       } else {
-        return; 
+        return;
       }
     }
     fecharModalMovimento();
@@ -548,8 +578,11 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
 
       <header>
         <div className="hero-content hero-painel">
-          <h1>Painel de Controle</h1>
-          <p className="tagline">Gerencie sua produção de forma inteligente</p>
+          {/* O sinal de '?' serve para o código não travar se o perfil ainda não existir */}
+          <h1>Painel de Controle - {perfilAtivo?.nome || "Carregando..."}</h1>
+          <p className="tagline">
+            Bem-vindo de volta, {perfilAtivo?.produtor || "Produtor"}!
+          </p>
         </div>
       </header>
 
@@ -561,11 +594,12 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
             {previsaoTempo.map((item) => (
               <div
                 key={item.id}
-                className={`card ${diaSelecionadoId === item.id ? "card-selecionado" : ""
-                  }`}
+                className={`card ${
+                  diaSelecionadoId === item.id ? "card-selecionado" : ""
+                }`}
                 onClick={() =>
                   setDiaSelecionadoId((prev) =>
-                    prev === item.id ? null : item.id
+                    prev === item.id ? null : item.id,
                   )
                 }
                 style={{ cursor: "pointer" }}
@@ -585,7 +619,7 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
             >
               {(() => {
                 const diaSelecionado = previsaoTempo.find(
-                  (dia) => dia.id === diaSelecionadoId
+                  (dia) => dia.id === diaSelecionadoId,
                 );
 
                 if (!diaSelecionado) return null;
@@ -717,7 +751,6 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
                 return (
                   <div key={produto.id} className="card card-produto">
                     <div className="card-produto-actions">
-
                       <button
                         type="button"
                         className="card-produto-action-btn"
@@ -753,7 +786,7 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
                     <p className="card-estoque">
                       Estoque atual:{" "}
                       {produto.estoqueAtual !== undefined &&
-                        produto.estoqueAtual !== null
+                      produto.estoqueAtual !== null
                         ? `${produto.estoqueAtual} ${produto.unidade}`
                         : `0 ${produto.unidade}`}
                     </p>
@@ -810,10 +843,7 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
 
       {produtoMovimento && (
         <div className="modal-movimento-overlay" onClick={fecharModalMovimento}>
-          <div
-            className="modal-movimento"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-movimento" onClick={(e) => e.stopPropagation()}>
             <h3 className="modal-movimento-titulo">
               {tipoMovimento === "entrada"
                 ? "Dar Entrada em Estoque"
@@ -851,7 +881,7 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
                 }}
               />
             </div>
-            
+
             <div className="modal-movimento-acoes">
               <button
                 type="button"
@@ -877,61 +907,101 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
       )}
       {produtoHistoricoModal && (
         <div className="modal-movimento-overlay" onClick={fecharHistoricoModal}>
-          <div 
-            className="modal-movimento" 
-            style={{ maxWidth: '550px' }} 
+          <div
+            className="modal-movimento"
+            style={{ maxWidth: "550px" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "15px",
+              }}
+            >
               <h3 className="modal-movimento-titulo">
                 🕒 Histórico: {produtoHistoricoModal.nome}
               </h3>
-              <button 
-                onClick={fecharHistoricoModal} 
-                style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}
+              <button
+                onClick={fecharHistoricoModal}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "1.5rem",
+                  cursor: "pointer",
+                }}
               >
                 ×
               </button>
             </div>
 
-            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
+            <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: "0.85em",
+                }}
+              >
                 <thead>
-                  <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
-                    <th style={{ padding: '8px' }}>Data</th>
-                    <th style={{ padding: '8px' }}>Ação</th>
-                    <th style={{ padding: '8px' }}>Qtd</th>
+                  <tr
+                    style={{
+                      borderBottom: "2px solid #eee",
+                      textAlign: "left",
+                    }}
+                  >
+                    <th style={{ padding: "8px" }}>Data</th>
+                    <th style={{ padding: "8px" }}>Ação</th>
+                    <th style={{ padding: "8px" }}>Qtd</th>
                   </tr>
                 </thead>
                 <tbody>
                   {historico
-                    .filter(item => item.produto === produtoHistoricoModal.nome)
+                    .filter(
+                      (item) => item.produto === produtoHistoricoModal.nome,
+                    )
                     .map((item) => (
-                      <tr key={item.id} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                        <td style={{ padding: '8px' }}>{item.data}</td>
-                        <td style={{ 
-                          padding: '8px', 
-                          color: item.tipo === 'Entrada' ? '#2e7d32' : '#c62828',
-                          fontWeight: 'bold' 
-                        }}>
+                      <tr
+                        key={item.id}
+                        style={{ borderBottom: "1px solid #f9f9f9" }}
+                      >
+                        <td style={{ padding: "8px" }}>{item.data}</td>
+                        <td
+                          style={{
+                            padding: "8px",
+                            color:
+                              item.tipo === "Entrada" ? "#2e7d32" : "#c62828",
+                            fontWeight: "bold",
+                          }}
+                        >
                           {item.tipo}
                         </td>
-                        <td style={{ padding: '8px' }}>{item.quantidade} {item.unidade}</td>
+                        <td style={{ padding: "8px" }}>
+                          {item.quantidade} {item.unidade}
+                        </td>
                       </tr>
                     ))}
                 </tbody>
               </table>
-              
-              {historico.filter(item => item.produto === produtoHistoricoModal.nome).length === 0 && (
-                <p style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+
+              {historico.filter(
+                (item) => item.produto === produtoHistoricoModal.nome,
+              ).length === 0 && (
+                <p
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    color: "#999",
+                  }}
+                >
                   Sem registros para este item.
                 </p>
               )}
             </div>
 
-            <div style={{ marginTop: '20px', textAlign: 'right' }}>
-              <button 
-                className="btn btn-estoque btn-cancelar-movimento" 
+            <div style={{ marginTop: "20px", textAlign: "right" }}>
+              <button
+                className="btn btn-estoque btn-cancelar-movimento"
                 onClick={fecharHistoricoModal}
               >
                 Fechar
@@ -939,7 +1009,7 @@ const registrarMovimentacao = (produto, tipo, quantidade) => {
             </div>
           </div>
         </div>
-      )}  
+      )}
       <footer>
         <div className="footer-bottom">
           <p>© 2025 AgroConnect. Transformando a agricultura.</p>
