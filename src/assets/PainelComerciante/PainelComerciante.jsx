@@ -44,7 +44,9 @@ const Comerciante = ({ onNavigate, onReservar }) => {
       id: Date.now(),
       agriNome: agri.nome,
       prodNome: prod.nome,
-      comerciante: "Mercado Central", // Nome fictício para a simulação
+      comerciante: "Mercado Central",
+      contatoTel: "(00) 00000-0000",
+      whatsapp: "5500000000000",
       data: new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit",

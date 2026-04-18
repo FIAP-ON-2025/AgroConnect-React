@@ -79,6 +79,11 @@ export default function PainelAgricultor({
         icon: "📦",
         titulo: "Nova Reserva Recebida!",
         descricao: `${n.comerciante} reservou ${n.prodNome} às ${n.data}.`,
+        contatoExibicao: n.contatoTel, // Criamos este campo novo para o visual
+        action: {
+          label: "Falar no WhatsApp",
+          link: `https://wa.me/${n.whatsapp}?text=Olá! Sou do ${perfilAtivo.nome} e vi sua reserva de ${n.prodNome} no AgroConnect.`,
+        },
       }));
 
     // Retornamos tudo junto: Clima (fixo), Estoque e as Reservas
@@ -828,6 +833,46 @@ export default function PainelAgricultor({
                   <span className="card-icon">{alerta.icon}</span>
                   <h3>{alerta.titulo}</h3>
                   <p>{alerta.descricao}</p>
+                  {alerta.contatoExibicao && (
+                    <p
+                      style={{
+                        fontSize: "0.9rem",
+                        color: "#555",
+                        marginTop: "10px",
+                        marginBottom: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span>📞</span>
+                      <strong>Contato:</strong> {alerta.contatoExibicao}
+                    </p>
+                  )}
+                  {alerta.action && (
+                    <a
+                      href={alerta.action.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-block",
+                        marginTop: "15px",
+                        padding: "10px 20px",
+                        backgroundColor: "#25D366",
+                        color: "#FFFFFF", // Forçando o branco puro
+                        textDecoration: "none",
+                        borderRadius: "8px",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        textAlign: "center",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        transition: "all 0.2s ease", // Deixa o efeito de passar o mouse mais suave
+                      }}
+                    >
+                      {alerta.action.label}
+                    </a>
+                  )}
                 </div>
               ))
             ) : (
