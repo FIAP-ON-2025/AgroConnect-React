@@ -338,6 +338,14 @@ export default function PainelAgricultor({
     console.log("Dados salvos no LocalStorage!");
   }, [listaProdutos]);
 
+  const handleNotificar = (produto) => {
+  setNotificacao({
+    tipo: "sucesso",
+    mensagem: "Famílias notificadas com sucesso!",
+  });
+  return;
+};
+
   const handleCadastrar = () => {
     if (nome === "" || estoqueAtual === "") {
       setNotificacao({
@@ -771,6 +779,16 @@ export default function PainelAgricultor({
                         title="Editar"
                         onClick={() => handleEditar(produto)}
                         aria-label="Editar produto"
+                      >
+                        
+                      </button>
+
+                      <button
+                        type="button"
+                        className="card-produto-action-btn-notify"
+                        title="Notificar"
+                        onClick={() => handleNotificar(produto)}
+                        aria-label="Notificar Famílias"
                       >
                         ✏️
                       </button>
