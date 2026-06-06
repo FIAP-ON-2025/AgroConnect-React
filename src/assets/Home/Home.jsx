@@ -7,7 +7,7 @@ export default function Home({ onNavigate }) {
       <nav>
         <div className="logo">
           <img
-            src="/public-images/logo_horizontal_ofc.png"
+            src="./public-images/logo_horizontal_ofc.png"
             alt="AgroConnect"
             className="logo-img"
           />
@@ -17,6 +17,7 @@ export default function Home({ onNavigate }) {
           <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Início</a></li>
           <li><a onClick={() => onNavigate('painel-agricultor')} style={{ cursor: 'pointer' }}>Painel Agricultor</a></li>
           <li><a onClick={() => onNavigate('painel-comerciante')} style={{ cursor: 'pointer' }}>Painel Comerciante</a></li>
+          <li><a onClick={() => onNavigate('Familia')} style={{ cursor: 'pointer' }}>Painel Família</a></li>
           <li><a onClick={() => onNavigate('cadastro')} style={{ cursor: 'pointer' }}>Cadastre-se</a></li>
           <li><a onClick={() => onNavigate('fale-conosco')} style={{ cursor: 'pointer' }}>Fale Conosco</a></li>
         </ul>

@@ -310,6 +310,37 @@ div[ref] {
   margin-bottom: 20px;
 }
 
+/* Popover e backdrop para pedido localizado acima do card */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 1040;
+}
+
+.modal-popover {
+  z-index: 1050;
+  max-width: 360px;
+  width: max-content;
+}
+
+.modal-popover .modal-simples {
+  margin: 0;
+  padding: 16px;
+  max-width: 360px;
+  border-radius: 12px;
+}
+
+.modal-popover h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.modal-popover label {
+  display: block;
+  font-size: 0.95rem;
+}
+
 form {
   display: flex;
   flex-direction: column;

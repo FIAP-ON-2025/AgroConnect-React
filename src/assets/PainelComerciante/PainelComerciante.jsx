@@ -69,7 +69,7 @@ const Comerciante = ({ onNavigate, onReservar }) => {
       <nav>
         <div className="logo">
           <img
-            src="/public-images/logo_horizontal_ofc.png"
+            src="./public-images/logo_horizontal_ofc.png"
             alt="Logo"
             className="logo-img"
           />

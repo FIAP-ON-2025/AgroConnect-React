@@ -35,7 +35,9 @@ function App() {
         />
       )}
 
-      {currentPage === "Familia" && <Familia onNavigate={setCurrentPage} />}
+      {currentPage === "Familia" && (
+        <Familia onNavigate={setCurrentPage} onReservar={adicionarReserva} />
+      )}
     </div>
   );
 }

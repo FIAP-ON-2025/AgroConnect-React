@@ -6,7 +6,7 @@ export default function Cadastro({ onNavigate }) {
       <nav>
         <div className="logo">
           <img
-            src="/public-images/logo_horizontal_ofc.png"
+            src="./public-images/logo_horizontal_ofc.png"
             alt="AgroConnect Logo"
             className="logo-img"
           />

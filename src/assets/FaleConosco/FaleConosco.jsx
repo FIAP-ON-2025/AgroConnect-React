@@ -5,11 +5,11 @@ export default function FaleConosco({ onNavigate }) {
     <>
       <nav>
         <div className="logo">
-          <img
-            src="/public-images/logo_horizontal_ofc.png"
-            alt="AgroConnect Logo"
-            className="logo-img"
-          />
+              <img
+                src="./public-images/logo_horizontal_ofc.png"
+                alt="Logo"
+                className="logo-img"
+              />
         </div>
 
         <ul className="nav-links">

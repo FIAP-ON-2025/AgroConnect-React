@@ -567,7 +567,7 @@ export default function PainelAgricultor({
       <nav>
         <div className="logo">
           <img
-            src="/public-images/logo_horizontal_ofc.png"
+            src="./public-images/logo_horizontal_ofc.png"
             alt="Logo"
             className="logo-img"
           />
@@ -780,20 +780,19 @@ export default function PainelAgricultor({
                         onClick={() => handleEditar(produto)}
                         aria-label="Editar produto"
                       >
-                        
+                      ✏️
                       </button>
 
                       <button
                         type="button"
-                        className="card-produto-action-btn-notify"
+                        className="card-produto-action-btn card-produto-action-btn-notify"
                         title="Notificar"
                         onClick={() => handleNotificar(produto)}
                         aria-label="Notificar Famílias"
                       >
-                        ✏️
+                        👨‍👩‍👧‍👦
                       </button>
                       <button
-                        type="button"
                         className="card-produto-action-btn card-produto-action-btn-delete"
                         title="Excluir"
                         onClick={() => handleExcluir(produto.id)}
